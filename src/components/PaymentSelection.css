@@ -1,0 +1,71 @@
+/* src/components/PaymentSelection.css */
+
+.payment-selection-container {
+  width: 100%;
+}
+
+.payment-options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.payment-option-card {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #fff;
+}
+
+.payment-option-card:hover {
+  border-color: #f8bbd0; /* Rosa pastel de tu marca */
+  transform: translateY(-3px);
+}
+
+.payment-option-card.selected {
+  border-color: var(--color-primario); /* Rosa vibrante */
+  box-shadow: 0 0 15px rgba(232, 62, 140, 0.2);
+  transform: translateY(-3px);
+}
+
+.payment-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  margin-right: 1.5rem;
+}
+
+.payment-details strong {
+  font-size: 1.1rem;
+  color: var(--color-texto);
+}
+
+.payment-details p {
+  margin: 0.25rem 0 0;
+  color: var(--color-texto-claro);
+  font-size: 0.9rem;
+}
+
+.payment-instructions {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-secundario);
+  border-radius: 12px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.payment-instructions strong {
+    color: var(--color-primario-oscuro);
+}
+
+/* Y añade esto a tu CheckoutPage.css para mejorar la selección de envío */
+.shipping-option.selected {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 15px rgba(232, 62, 140, 0.2);
+}

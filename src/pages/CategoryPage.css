@@ -1,0 +1,16 @@
+/* src/pages/CategoryPage.css */
+
+.category-page-container {
+  width: 100%;
+}
+
+.category-title {
+  font-family: var(--font-titulos);
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--color-texto);
+  border-bottom: 2px solid var(--color-primario);
+  display: inline-block; /* Para que el borde se ajuste al texto */
+  padding-bottom: 10px;
+}

@@ -1,0 +1,340 @@
+/* src/pages/Admin.css */
+
+.admin-container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.product-form {
+  margin-top: 30px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: var(--radio-borde);
+  box-shadow: var(--sombra);
+  border: 1px solid #f0f0f0;
+}
+
+.product-form h3 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-family: var(--font-titulos);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-family: var(--font-titulos);
+  font-size: 0.9rem;
+  color: var(--color-texto-claro);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
+  font-family: var(--font-cuerpo);
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: var(--color-primario);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background-color: var(--color-primario-oscuro);
+}
+
+/* Añade esto al final de src/pages/Admin.css */
+
+.product-list-container {
+  margin-top: 50px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: var(--radio-borde);
+  box-shadow: var(--sombra);
+  border: 1px solid #f0f0f0;
+}
+
+.product-list-container h3 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-family: var(--font-titulos);
+}
+
+.product-list-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.product-list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.list-item-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-item-info strong {
+  font-weight: 600;
+}
+
+.list-item-info span {
+  font-size: 0.9rem;
+  color: var(--color-texto-claro);
+}
+
+.list-item-actions button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 10px;
+  transition: opacity 0.2s;
+}
+
+.list-item-actions button:hover {
+  opacity: 0.8;
+}
+
+.btn-edit {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-delete {
+  background-color: #ef5350;
+  color: white;
+}
+
+/* Añade esto al final de src/pages/Admin.css */
+
+.form-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.form-buttons .submit-btn {
+  flex-grow: 1; /* Hace que el botón principal crezca */
+  margin-top: 0;
+}
+
+.btn-cancel {
+  padding: 15px;
+  background-color: #6c757d; /* Un gris neutro */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #5a6268;
+}
+
+/* Añade esto a src/pages/Admin.css */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.admin-header .submit-btn {
+  text-decoration: none;
+  padding: 12px 25px;
+}
+
+/* Añade esto al final de src/pages/Admin.css */
+
+/* Controles de la lista (título y búsqueda) */
+.list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
+  gap: 15px;
+}
+
+.list-controls h3 {
+  margin: 0;
+}
+
+.search-input {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 300px; /* Ancho máximo para la barra de búsqueda */
+  font-size: 1rem;
+}
+
+/* Contenedor de la tabla para permitir scroll horizontal si es necesario */
+.table-container {
+  overflow-x: auto;
+}
+
+/* Estilos de la tabla */
+.product-table {
+  width: 100%;
+  border-collapse: collapse; /* Une los bordes de las celdas */
+  text-align: left;
+}
+
+.product-table th, .product-table td {
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle; /* Alinea el contenido verticalmente al centro */
+}
+
+.product-table thead {
+  background-color: #fafafa;
+}
+
+.product-table th {
+  font-family: var(--font-titulos);
+  font-weight: 600;
+  color: var(--color-texto-claro);
+}
+
+.product-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table-item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.table-item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.table-item-actions .btn-edit,
+.table-item-actions .btn-delete {
+  padding: 8px 12px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Renombramos el botón principal para que sea más específico */
+.admin-header .btn-add-new {
+  background-color: var(--color-primario);
+  color: white;
+  padding: 12px 25px;
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.admin-header .btn-add-new:hover {
+  background-color: var(--color-primario-oscuro);
+}
+
+/* Añade esto al final de src/pages/Admin.css */
+
+.filters {
+  display: flex;
+  gap: 15px; /* Espacio entre el desplegable y la barra de búsqueda */
+  flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
+}
+
+.category-filter, .search-input {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-cuerpo);
+}
+
+.category-filter {
+  background-color: white;
+  cursor: pointer;
+}
+/* Añade esto al final de src/pages/Admin.css */
+
+.admin-header-actions {
+  display: flex;
+  gap: 15px; /* Espacio entre los botones */
+  align-items: center;
+}
+
+.btn-logout {
+  background-color: #6c757d; /* Gris */
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background-color: #5a6268;
+}
+
+/* Añade esto al final de src/pages/Admin.css */
+
+.forgot-password {
+  text-align: right;
+  font-size: 0.9rem;
+  color: var(--color-primario);
+  cursor: pointer;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  transition: color 0.2s;
+}
+
+.forgot-password:hover {
+  color: var(--color-primario-oscuro);
+  text-decoration: underline;
+}

@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Esta regla permite que cualquier persona (incluida tu aplicación)
+    // pueda leer y escribir en cualquier parte de la base de datos.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

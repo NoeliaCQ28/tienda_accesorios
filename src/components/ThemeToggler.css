@@ -1,0 +1,25 @@
+/* src/components/ThemeToggler.css */
+.theme-toggler {
+  background-color: transparent;
+  border: 1px solid #ddd;
+  color: var(--color-texto);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.theme-toggler:hover {
+  transform: scale(1.1) rotate(15deg);
+  border-color: var(--color-primario);
+}
+
+/* En modo oscuro, ajustamos el borde del botón para que sea visible */
+html[data-theme='dark'] .theme-toggler {
+  border-color: #555;
+}

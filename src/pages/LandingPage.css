@@ -1,0 +1,140 @@
+/* src/pages/LandingPage.css */
+
+/* SECCIÓN 1: HÉROE */
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 60vh; /* Ocupa el 60% de la altura de la pantalla */
+  min-height: 400px;
+  background-image: linear-gradient(rgba(253, 242, 247, 0.8), rgba(253, 242, 247, 0.8)), url('https://images.unsplash.com/photo-1599399349834-54faf333fe73?w=500&q=80');
+  background-size: cover;
+  background-position: center;
+  color: #333;
+}
+
+.hero-content h1 {
+  font-family: var(--font-titulos);
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+.hero-button {
+  background-color: var(--color-primario);
+  color: white;
+  padding: 15px 35px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.hero-button:hover {
+  background-color: var(--color-primario-oscuro);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* SECCIÓN 2: PRODUCTOS DESTACADOS */
+.featured-products-section {
+  padding: 60px 20px;
+  max-width: var(--ancho-contenido);
+  margin: 0 auto;
+}
+
+.featured-products-section h2 {
+  text-align: center;
+  font-family: var(--font-titulos);
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+}
+
+/* Reutilizamos .product-grid y .product-card de App.css */
+
+
+/* SECCIÓN 3: SOBRE NOSOTROS */
+.about-us-section {
+  background-color: var(--color-secundario);
+  padding: 60px 20px;
+}
+
+.about-us-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about-us-content h2 {
+  font-family: var(--font-titulos);
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.about-us-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--color-texto-claro);
+}
+
+/* src/pages/LandingPage.css - Añadir al final */
+
+/* SECCIÓN 4: TESTIMONIOS */
+.testimonials-section {
+  padding: 60px 20px;
+  background-color: #fff; /* Fondo blanco para contrastar */
+}
+
+.testimonials-section h2 {
+  text-align: center;
+  font-family: var(--font-titulos);
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: var(--ancho-contenido);
+  margin: 0 auto;
+}
+
+.testimonial-card {
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sombra);
+}
+
+.testimonial-quote {
+  font-style: italic;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.testimonial-rating {
+  color: #ffc107; /* Color dorado para las estrellas */
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.testimonial-author {
+  font-weight: bold;
+  color: var(--color-primario);
+}

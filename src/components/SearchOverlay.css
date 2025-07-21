@@ -1,0 +1,70 @@
+/* src/components/SearchOverlay.css */
+
+.search-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 15vh;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.search-overlay-content {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.search-overlay-form {
+  display: flex;
+  width: 100%;
+  background-color: var(--color-superficie);
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.search-overlay-input {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 1.2rem 1.8rem;
+  font-size: 1.2rem;
+  color: var(--color-texto);
+  border-radius: 50px;
+}
+
+.search-overlay-input:focus {
+  outline: none;
+}
+
+.search-overlay-button {
+  background: none;
+  border: none;
+  padding: 0 2rem;
+  cursor: pointer;
+  font-size: 1.3rem;
+  color: var(--color-texto-claro);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
