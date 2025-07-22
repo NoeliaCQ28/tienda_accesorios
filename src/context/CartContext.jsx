@@ -1,9 +1,10 @@
-// src/context/CartContext.jsx - Lógica separada de la UI
+// src/context/CartContext.jsx - Versión final con personalización y Firestore
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { db } from '../firebaseConfig';
 import { useAuth } from './AuthContext';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
+import toast from 'react-hot-toast'; // Importamos toast, ya que lo usas en tu código
 
 export const CartContext = createContext();
 
@@ -18,15 +19,30 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const { currentUser } = useAuth();
 
+  // Función para obtener el carrito desde Firestore
+  const fetchCart = async () => {
+    if(!currentUser) return;
+    setLoading(true);
+    try {
+        const cartRef = collection(db, 'users', currentUser.uid, 'cart');
+        const snapshot = await getDocs(cartRef);
+        // El ID del documento es nuestro cartItemId, lo guardamos en el objeto
+        const cartData = snapshot.docs.map(doc => ({ cartItemId: doc.id, ...doc.data() }));
+        setCart(cartData);
+    } catch (error) {
+        console.error("Error al cargar el carrito:", error);
+        toast.error("No se pudo cargar tu carrito.");
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  // Carga el carrito cuando el usuario inicia sesión
   useEffect(() => {
     if (currentUser) {
-      setLoading(true);
-      const cartRef = collection(db, 'users', currentUser.uid, 'cart');
-      getDocs(cartRef).then(snapshot => {
-        const cartData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setCart(cartData);
-      }).finally(() => setLoading(false));
+      fetchCart();
     } else {
+      // Si el usuario cierra sesión, se vacía el carrito local
       setCart([]);
     }
   }, [currentUser]);
@@ -34,7 +50,16 @@ export const CartProvider = ({ children }) => {
   const addItem = async (item, quantity) => {
     if (!currentUser) return false;
 
-    const cartRef = doc(db, 'users', currentUser.uid, 'cart', item.id);
+    // ***** LÓGICA DE PERSONALIZACIÓN INTEGRADA *****
+    // 1. Creamos un ID único para el item en el carrito.
+    // Si tiene personalización, el ID la incluye. Si no, es solo el ID del producto.
+    // Esto permite que 'Pulsera (Roja)' y 'Pulsera (Azul)' sean items diferentes.
+    const cartItemId = item.customization
+        ? `${item.id}-${item.customization.value}` // ej: 'producto123-Rojo'
+        : item.id;
+
+    // 2. Usamos el nuevo cartItemId como la referencia del documento en Firestore.
+    const cartItemRef = doc(db, 'users', currentUser.uid, 'cart', cartItemId);
     const productRef = doc(db, 'productos', item.id);
 
     try {
@@ -42,51 +67,50 @@ export const CartProvider = ({ children }) => {
         if (!productSnap.exists()) throw new Error("El producto no existe");
 
         const availableStock = productSnap.data().stock;
-        const cartItemSnap = await getDoc(cartRef);
+        const cartItemSnap = await getDoc(cartItemRef);
         const currentQuantityInCart = cartItemSnap.exists() ? cartItemSnap.data().quantity : 0;
 
         if (currentQuantityInCart + quantity > availableStock) {
-            toast.error(`No hay suficiente stock para "${item.nombre}".`); // Usaremos toast para errores
-            return false; // Devolvemos false si no hay stock
+            toast.error(`No hay suficiente stock para "${item.nombre}".`);
+            return false;
         }
 
         if (cartItemSnap.exists()) {
-            await updateDoc(cartRef, { quantity: currentQuantityInCart + quantity });
+            // Si el item exacto (con la misma personalización) ya existe, solo aumenta la cantidad
+            await updateDoc(cartItemRef, { quantity: currentQuantityInCart + quantity });
         } else {
-            await setDoc(cartRef, { ...item, quantity: quantity });
+            // Si es un item nuevo, lo creamos con todos sus datos
+            const newItemData = { ...item, quantity };
+            // No es necesario guardar el cartItemId dentro del documento, ya es el ID.
+            delete newItemData.cartItemId; 
+            await setDoc(cartItemRef, newItemData);
         }
 
         fetchCart(); // Recargamos el carrito desde Firestore para tener el estado más actualizado
-        return true; // Devolvemos true si la operación fue exitosa
+        return true;
     } catch (error) {
         console.error("Error al añadir item:", error);
+        toast.error("No se pudo añadir el producto al carrito.");
         return false;
     }
   };
-
-  const fetchCart = async () => {
-    if(!currentUser) return;
-    const cartRef = collection(db, 'users', currentUser.uid, 'cart');
-    const snapshot = await getDocs(cartRef);
-    const cartData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setCart(cartData);
-  }
   
-  const decreaseItem = async (itemId) => {
+  const decreaseItem = async (cartItemId) => {
     if (!currentUser) return;
-    const cartRef = doc(db, 'users', currentUser.uid, 'cart', itemId);
-    const cartItemSnap = await getDoc(cartRef);
+    const cartItemRef = doc(db, 'users', currentUser.uid, 'cart', cartItemId);
+    const cartItemSnap = await getDoc(cartItemRef);
+
     if(cartItemSnap.exists() && cartItemSnap.data().quantity > 1) {
-        await updateDoc(cartRef, { quantity: cartItemSnap.data().quantity - 1 });
+        await updateDoc(cartItemRef, { quantity: cartItemSnap.data().quantity - 1 });
     } else {
-        await deleteDoc(cartRef);
+        await deleteDoc(cartItemRef);
     }
     fetchCart();
   };
 
-  const removeItem = async (itemId) => {
+  const removeItem = async (cartItemId) => {
     if (!currentUser) return;
-    await deleteDoc(doc(db, 'users', currentUser.uid, 'cart', itemId));
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'cart', cartItemId));
     fetchCart();
   };
   

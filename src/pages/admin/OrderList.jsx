@@ -21,8 +21,7 @@ const OrderList = () => {
     { value: 'canceled', label: 'Cancelado' }
   ];
 
-  useEffect(() => {
-    const fetchOrders = async () => {
+  const fetchOrders = async () => {
       setLoading(true);
       try {
         const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
@@ -36,6 +35,8 @@ const OrderList = () => {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchOrders();
   }, []);
 
@@ -86,9 +87,10 @@ const OrderList = () => {
       });
 
       // Actualizamos el estado en la UI solo si la transacción fue exitosa
-      promise.catch(err => {
+       promise.then(() => {
+        fetchOrders(); // Recarga las órdenes para reflejar los cambios de stock si es necesario
+      }).catch(err => {
         console.error("Error en la transacción, se revirtieron los cambios:", err);
-        // Opcional: Revertir el cambio local si la transacción falla
         fetchOrders(); // Vuelve a cargar los datos originales
       });
 
@@ -172,12 +174,22 @@ const OrderList = () => {
                   <div className="detail-section products-section">
                     <strong>Productos:</strong>
                     <ul>
-                      {order.items.map(item => (
-                        <li key={item.id}>
+                       {/* ***** INICIO DE LA MODIFICACIÓN ***** */}
+                      {order.items.map((item, index) => (
+                        <li key={`${item.id}-${index}`}>
                           <img src={item.imagenUrl} alt={item.nombre} />
-                          <span>{item.quantity} x {item.nombre}</span>
+                          <div>
+                            <span>{item.quantity} x {item.nombre}</span>
+                            {/* Si el item tiene personalización, la mostramos aquí */}
+                            {item.customization && (
+                              <div className="customization-detail">
+                                <strong>Personalización:</strong> {item.customization.value}
+                              </div>
+                            )}
+                          </div>
                         </li>
                       ))}
+                       {/* ***** FIN DE LA MODIFICACIÓN ***** */}
                     </ul>
                   </div>
                   <div className="detail-section customer-section">

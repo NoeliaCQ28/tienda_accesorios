@@ -18,8 +18,6 @@
 .btn-checkout { background-color: var(--color-primario-oscuro); color: white; }
 .btn-clear-cart, .btn-checkout { padding: 12px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; border: none; }
 
-/* Añade esto al final de src/pages/Cart.css */
-
 .quantity-controls {
   display: flex;
   align-items: center;
@@ -48,3 +46,18 @@
   min-width: 20px;
   text-align: center;
 }
+
+/* ***** INICIO DE LA MODIFICACIÓN ***** */
+/* Estilos para mostrar el color personalizado en el carrito */
+.cart-item-customization {
+  font-size: 0.9rem; /* 14px */
+  color: var(--color-texto-claro);
+  background-color: var(--color-secundario);
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px; /* Borde más suave */
+  display: inline-block; /* Para que el fondo no ocupe toda la línea */
+  margin-top: -0.5rem; /* Acerca el texto al título */
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--color-borde);
+}
+/* ***** FIN DE LA MODIFICACIÓN ***** */

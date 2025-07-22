@@ -165,16 +165,32 @@ const CheckoutPage = () => {
         <h3>Resumen del Pedido</h3>
         {cart.length > 0 ? (
           cart.map(item => (
-            <div key={item.id} className="summary-item">
-              <div className="summary-item-image"><img src={item.imagenUrl} alt={item.nombre} /><span className="summary-item-quantity">{item.quantity}</span></div>
-              <div className="summary-item-details"><strong>{item.nombre}</strong></div>
-              <div className="summary-item-price"><span>S/ {(item.precio * item.quantity).toFixed(2)}</span></div>
+            // ***** INICIO DE LA MODIFICACIÓN *****
+            // Usamos el cartItemId como key, ya que ahora es único para cada producto/personalización
+            <div key={item.cartItemId} className="summary-item">
+              <div className="summary-item-image">
+                <img src={item.imagenUrl} alt={item.nombre} />
+                <span className="summary-item-quantity">{item.quantity}</span>
+              </div>
+              <div className="summary-item-details">
+                <strong>{item.nombre}</strong>
+                {/* Si el item tiene personalización, la mostramos aquí */}
+                {item.customization && (
+                  <span className="summary-item-customization">
+                    Color: {item.customization.value}
+                  </span>
+                )}
+              </div>
+              <div className="summary-item-price">
+                <span>S/ {(item.precio * item.quantity).toFixed(2)}</span>
+              </div>
             </div>
+            // ***** FIN DE LA MODIFICACIÓN *****
           ))
         ) : <p>Tu carrito está vacío.</p>}
         <div className="summary-totals">
           <div className="summary-line"><span>Subtotal ({totalQuantity()} productos)</span><span>S/ {totalPrice().toFixed(2)}</span></div>
-          <div className="summary-line"><span>Envío</span><span>{shippingOption ? `S/ ${shippingOption.price.toFixed(2)}` : 'Selecciona una opción'}</span></div>
+          <div className="summary-line"><span>Envío</span><span>{shippingOption ? (shippingOption.price > 0 ? `S/ ${shippingOption.price.toFixed(2)}` : 'Pago en destino') : 'Selecciona una opción'}</span></div>
           <div className="summary-line total"><span>Total</span><span>S/ {finalTotal.toFixed(2)}</span></div>
         </div>
       </div>

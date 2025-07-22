@@ -17,7 +17,7 @@
 .confirmation-sidebar {
   flex: 1;
   min-width: 250px;
-  background-color: #fdf2f7;
+  background-color: var(--color-secundario);
   padding: 1.5rem;
   border-radius: 12px;
   align-self: flex-start;
@@ -35,6 +35,77 @@
   margin-bottom: 2rem;
 }
 
+/* ***** INICIO DE NUEVOS ESTILOS ***** */
+.order-summary-card {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  background-color: var(--color-superficie);
+}
+
+.order-summary-card h4 {
+  font-family: var(--font-titulos);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-borde);
+  padding-bottom: 1rem;
+}
+
+.order-summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.order-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.order-summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.summary-item-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-name {
+  font-weight: 600;
+}
+
+.item-customization {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.item-price {
+  font-weight: 600;
+}
+
+.order-summary-total {
+  text-align: right;
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  font-family: var(--font-titulos);
+}
+
+/* ***** FIN DE NUEVOS ESTILOS ***** */
+
 .payment-instructions-card {
   background-color: #fafafa;
   border: 1px solid #eee;
@@ -43,6 +114,11 @@
   margin-bottom: 2rem;
   text-align: center;
 }
+html[data-theme='dark'] .payment-instructions-card {
+    background-color: var(--color-superficie);
+    border-color: var(--color-borde);
+}
+
 
 .qr-code {
   max-width: 200px;
@@ -50,7 +126,7 @@
 }
 
 .upload-section {
-  border: 1px solid #eee;
+  border: 1px solid var(--color-borde);
   border-radius: 12px;
   padding: 2rem;
   text-align: center;
@@ -93,4 +169,5 @@
     display: block;
     margin-top: 0.5rem;
     font-weight: normal;
+    color: var(--color-primario);
 }

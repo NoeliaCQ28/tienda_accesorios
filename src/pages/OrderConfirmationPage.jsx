@@ -1,27 +1,26 @@
-// src/pages/OrderConfirmationPage.jsx - con compresión de imágenes
+// src/pages/OrderConfirmationPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db } from '../firebaseConfig';
 import toast from 'react-hot-toast';
-import imageCompression from 'browser-image-compression'; // <-- 1. IMPORTAMOS LA LIBRERÍA
+import imageCompression from 'browser-image-compression';
 import './OrderConfirmationPage.css';
 
-import yapeQr from '../assets/yape-qr-placeholder.jpg'; 
+import yapeQr from '../assets/yape-qr-placeholder.jpg';
 
 const OrderConfirmationPage = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
-  
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
-    // ... (esta función de useEffect no cambia en absoluto)
     const fetchOrder = async () => {
       setLoading(true);
       try {
@@ -47,24 +46,22 @@ const OrderConfirmationPage = () => {
     }
   };
 
-  // --- FUNCIÓN DE SUBIDA ACTUALIZADA CON COMPRESIÓN ---
-  const handleUpload = async () => { // <--- La convertimos en async
+  const handleUpload = async () => {
     if (!file) {
       toast.error("Por favor, selecciona un archivo primero.");
       return;
     }
 
-    // Opciones para la compresión
     const options = {
-      maxSizeMB: 1,          // Tamaño máximo del archivo en MB
-      maxWidthOrHeight: 1024,  // Redimensiona la imagen si es más ancha o alta de 1024px
-      useWebWorker: true,    // Usa un worker para no bloquear la interfaz
-    }
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1024,
+      useWebWorker: true,
+    };
 
     let compressedFile;
     try {
       toast.loading('Comprimiendo imagen...');
-      compressedFile = await imageCompression(file, options); // <--- 2. COMPRIMIMOS EL ARCHIVO
+      compressedFile = await imageCompression(file, options);
       toast.dismiss();
     } catch (error) {
       toast.dismiss();
@@ -75,18 +72,18 @@ const OrderConfirmationPage = () => {
 
     const storage = getStorage();
     const storageRef = ref(storage, `comprobantes/${orderId}/${compressedFile.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, compressedFile); // <--- 3. SUBIMOS EL ARCHIVO COMPRIMIDO
+    const uploadTask = uploadBytesResumable(storageRef, compressedFile);
     toast.loading('Subiendo comprobante...');
 
-    uploadTask.on('state_changed', 
+    uploadTask.on('state_changed',
       (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setUploadProgress(progress);
-      }, 
+      },
       (error) => {
         toast.dismiss();
         toast.error("Error al subir la imagen.");
-      }, 
+      },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
           const orderDocRef = doc(db, 'orders', orderId);
@@ -96,7 +93,7 @@ const OrderConfirmationPage = () => {
           });
           toast.dismiss();
           toast.success("¡Comprobante enviado! Redirigiendo a tu perfil...");
-          
+
           setTimeout(() => {
             navigate('/cuenta');
           }, 2000);
@@ -109,8 +106,7 @@ const OrderConfirmationPage = () => {
   if (!order) return <div className="loading-container">No se pudo cargar la información del pedido.</div>;
 
   const renderPaymentDetails = () => {
-    // ... (esta función no cambia)
-    switch(order.paymentMethod) {
+    switch (order.paymentMethod) {
       case 'yape':
         return (
           <div className="payment-instructions-card">
@@ -133,23 +129,49 @@ const OrderConfirmationPage = () => {
       default:
         return <p>Contacta con nosotros para coordinar el pago.</p>;
     }
-  }
+  };
 
   return (
     <div className="confirmation-page">
-      {/* ... (el resto del JSX para mostrar la página no cambia) ... */}
       <div className="confirmation-main">
         <div className="confirmation-header">
-          <h2>¡Su orden fue recibida!</h2>
+          <h2>¡Tu orden fue recibida!</h2>
           <p className="order-number">Pedido: #{order.id.substring(0, 8).toUpperCase()}</p>
         </div>
+
+        {/* ***** INICIO DE LA MODIFICACIÓN ***** */}
+        <div className="order-summary-card">
+          <h4>Resumen de tu Compra</h4>
+          <ul className="order-summary-list">
+            {order.items.map((item, index) => (
+              <li key={`${item.id}-${index}`} className="order-summary-item">
+                <img src={item.imagenUrl} alt={item.nombre} className="summary-item-thumbnail" />
+                <div className="summary-item-info">
+                  <span className="item-name">{item.quantity} x {item.nombre}</span>
+                  {item.customization && (
+                    <span className="item-customization">
+                      (Color: {item.customization.value})
+                    </span>
+                  )}
+                </div>
+                <span className="item-price">S/ {(item.precio * item.quantity).toFixed(2)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="order-summary-total">
+            <strong>Total del Pedido: S/ {order.total.toFixed(2)}</strong>
+          </div>
+        </div>
+        {/* ***** FIN DE LA MODIFICACIÓN ***** */}
+        
         {renderPaymentDetails()}
+
         <div className="upload-section">
           <h4>Subir comprobante de pago</h4>
           {order.status === 'payment_in_review' || order.proofOfPaymentUrl ? (
             <div className="upload-success">
               <p>✅ ¡Ya hemos recibido tu comprobante! Lo revisaremos pronto.</p>
-              <a href={order.proofOfPaymentUrl} target="_blank" rel="noopener noreferrer">Ver comprobante</a>
+              <Link to="/cuenta">Ir a mis pedidos</Link>
             </div>
           ) : (
             <>
@@ -161,11 +183,12 @@ const OrderConfirmationPage = () => {
           )}
         </div>
       </div>
+
       <div className="confirmation-sidebar">
-        <h3>Si necesitas ayuda, contáctanos:</h3>
-        <p>Gmail: accesoriosliath@gmail.com</p>
-        <p>Teléfono: +51 987 869 687</p>
-        <p>WhatsApp: +51 987 869 687</p>
+        <h3>¿Necesitas Ayuda?</h3>
+        <p>Si tienes alguna duda con tu pago o pedido, no dudes en contactarnos.</p>
+        <p><strong>Gmail:</strong> accesoriosliath@gmail.com</p>
+        <p><strong>Teléfono:</strong> +51 987 869 687</p>
         <a href="https://wa.me/51987869687" target="_blank" rel="noopener noreferrer" className="whatsapp-btn">Escribir a WhatsApp</a>
       </div>
     </div>

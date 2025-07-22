@@ -1,13 +1,13 @@
-// src/pages/Cart.jsx - Con controles de cantidad
+// src/pages/Cart.jsx
 
 import React, { useContext } from 'react';
 import { CartContext } from '../context/CartContext';
 import { Link } from 'react-router-dom';
-import './Cart.css';
+import './Cart.css'; // Asegúrate de que los estilos estén importados
 
 const Cart = () => {
-  // Obtenemos las nuevas funciones del contexto
-  const { cart, removeItem, clear, totalPrice, addItem, decreaseItem } = useContext(CartContext);
+  // Obtenemos las funciones y el estado del contexto del carrito
+  const { cart, removeItem, clear, totalPrice, addItem, decreaseItem, totalQuantity } = useContext(CartContext);
 
   if (cart.length === 0) {
     return (
@@ -26,15 +26,26 @@ const Cart = () => {
       <h2>Resumen de tu Compra</h2>
       <div className="cart-items">
         {cart.map((item) => (
-          <div key={item.id} className="cart-item">
+          // Usamos el cartItemId que es único para cada producto, incluyendo su personalización
+          <div key={item.cartItemId} className="cart-item">
             <img src={item.imagenUrl} alt={item.nombre} className="cart-item-image" />
             <div className="cart-item-details">
               <h3>{item.nombre}</h3>
+              
+              {/* ***** INICIO DE LA MODIFICACIÓN ***** */}
+              {/* Si el item tiene personalización (color), la mostramos aquí */}
+              {item.customization && (
+                <p className="cart-item-customization">
+                  Color: {item.customization.value}
+                </p>
+              )}
+              {/* ***** FIN DE LA MODIFICACIÓN ***** */}
+
               <p>Precio unitario: S/ {item.precio.toFixed(2)}</p>
               
-              {/* --- ¡NUEVOS CONTROLES DE CANTIDAD! --- */}
               <div className="quantity-controls">
-                <button onClick={() => decreaseItem(item.id)} className="quantity-btn">-</button>
+                {/* Pasamos el cartItemId único a las funciones */}
+                <button onClick={() => decreaseItem(item.cartItemId)} className="quantity-btn">-</button>
                 <span>{item.quantity}</span>
                 <button onClick={() => addItem(item, 1)} className="quantity-btn">+</button>
               </div>
@@ -42,7 +53,8 @@ const Cart = () => {
             </div>
             <div className="cart-item-actions">
               <p className="cart-item-subtotal">Subtotal: S/ {(item.precio * item.quantity).toFixed(2)}</p>
-              <button onClick={() => removeItem(item.id)} className="btn-remove">
+              {/* Pasamos el cartItemId único a la función de remover */}
+              <button onClick={() => removeItem(item.cartItemId)} className="btn-remove">
                 Eliminar todo
               </button>
             </div>
@@ -51,6 +63,7 @@ const Cart = () => {
       </div>
       <div className="cart-summary">
         <h3>Total de la compra: S/ {totalPrice().toFixed(2)}</h3>
+        <p>{totalQuantity()} productos en total</p>
         <div className="cart-summary-buttons">
           <button onClick={() => clear()} className="btn-clear-cart">
             Vaciar Carrito

@@ -43,6 +43,8 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
+  margin-top: 2rem; /* <-- AÑADE ESTA LÍNEA */
+
 }
 
 .quantity-selector {
@@ -103,4 +105,167 @@
   .product-detail-layout {
     grid-template-columns: 1fr;
   }
+}
+
+/* --- Estilos para el Selector de Colores --- */
+
+.color-selector-container {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--color-borde);
+  padding-top: 1.5rem;
+}
+
+/* --- Toggle: Mantener / Personalizar --- */
+.color-toggle-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.color-toggle-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-family: var(--font-cuerpo);
+  font-weight: 600;
+  border-radius: 50px;
+  border: 1px solid var(--color-borde);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-superficie);
+  color: var(--color-texto-claro);
+}
+
+.color-toggle-btn:hover {
+  border-color: #9ca3af;
+}
+
+.color-toggle-btn.active.default {
+  background-color: #374151;
+  color: #ffffff;
+  border-color: #374151;
+}
+
+.color-toggle-btn.active.custom {
+  background-color: var(--color-primario);
+  color: #ffffff;
+  border-color: var(--color-primario);
+}
+
+/* --- Caja de personalización --- */
+.customization-box {
+  padding: 1.5rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  background-color: var(--color-secundario);
+}
+
+/* --- Selector de Familias --- */
+.family-picker-container h3,
+.tone-picker-container h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-titulos);
+  color: var(--color-texto);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.family-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.family-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 50px;
+  border: 1px solid var(--color-borde);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font-weight: 500;
+}
+
+.family-btn:hover {
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+.family-btn.active {
+  background-color: var(--color-primario);
+  color: #ffffff;
+  border-color: var(--color-primario);
+}
+
+/* --- Selector de Tonos de Color --- */
+.tone-picker-container {
+  margin-top: 1.5rem;
+}
+
+.tone-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1.5rem 0.75rem; /* Espacio vertical y horizontal */
+}
+
+.tone-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 80px; /* Ancho fijo para cada color */
+}
+
+.tone-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.tone-btn:hover {
+  transform: scale(1.1);
+}
+
+.tone-btn.active {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 3px;
+}
+
+.tone-name {
+  font-size: 0.75rem; /* 12px */
+  margin-top: 0.5rem;
+  color: var(--color-texto-claro);
+  height: 2.2rem; /* Altura fija para alinear textos de 1 o 2 líneas */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Vista previa del color seleccionado --- */
+.color-preview-container {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-secundario);
+  border-radius: var(--radio-borde);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--color-borde);
+}
+.color-preview-text {
+  margin: 0;
+  font-weight: 600;
+  font-family: var(--font-titulos);
+}
+.color-preview-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
