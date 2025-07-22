@@ -1,10 +1,10 @@
-// src/context/CartContext.jsx - Versión final con personalización y Firestore
+// src/context/CartContext.jsx
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { db } from '../firebaseConfig';
 import { useAuth } from './AuthContext';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
-import toast from 'react-hot-toast'; // Importamos toast, ya que lo usas en tu código
+import toast from 'react-hot-toast';
 
 export const CartContext = createContext();
 
@@ -26,7 +26,6 @@ export const CartProvider = ({ children }) => {
     try {
         const cartRef = collection(db, 'users', currentUser.uid, 'cart');
         const snapshot = await getDocs(cartRef);
-        // El ID del documento es nuestro cartItemId, lo guardamos en el objeto
         const cartData = snapshot.docs.map(doc => ({ cartItemId: doc.id, ...doc.data() }));
         setCart(cartData);
     } catch (error) {
@@ -42,7 +41,6 @@ export const CartProvider = ({ children }) => {
     if (currentUser) {
       fetchCart();
     } else {
-      // Si el usuario cierra sesión, se vacía el carrito local
       setCart([]);
     }
   }, [currentUser]);
@@ -50,15 +48,15 @@ export const CartProvider = ({ children }) => {
   const addItem = async (item, quantity) => {
     if (!currentUser) return false;
 
-    // ***** LÓGICA DE PERSONALIZACIÓN INTEGRADA *****
-    // 1. Creamos un ID único para el item en el carrito.
-    // Si tiene personalización, el ID la incluye. Si no, es solo el ID del producto.
-    // Esto permite que 'Pulsera (Roja)' y 'Pulsera (Azul)' sean items diferentes.
-    const cartItemId = item.customization
-        ? `${item.id}-${item.customization.value}` // ej: 'producto123-Rojo'
-        : item.id;
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // 1. Generamos un ID único para el carrito basado en el producto, el color Y el texto.
+    //    Esto asegura que cada combinación única sea un item separado en el carrito.
+    const colorIdPart = item.customization?.color?.value || 'default-color';
+    const textIdPart = item.customization?.text?.value || 'no-text';
+    const cartItemId = `${item.id}-${colorIdPart}-${textIdPart}`;
+    // --- FIN DE LA MODIFICACIÓN ---
 
-    // 2. Usamos el nuevo cartItemId como la referencia del documento en Firestore.
+    // 2. Usamos este nuevo y más específico cartItemId como la referencia del documento.
     const cartItemRef = doc(db, 'users', currentUser.uid, 'cart', cartItemId);
     const productRef = doc(db, 'productos', item.id);
 
@@ -76,13 +74,12 @@ export const CartProvider = ({ children }) => {
         }
 
         if (cartItemSnap.exists()) {
-            // Si el item exacto (con la misma personalización) ya existe, solo aumenta la cantidad
+            // Si el item exacto (mismo producto, mismo color, mismo texto) ya existe, solo aumenta la cantidad
             await updateDoc(cartItemRef, { quantity: currentQuantityInCart + quantity });
         } else {
             // Si es un item nuevo, lo creamos con todos sus datos
             const newItemData = { ...item, quantity };
-            // No es necesario guardar el cartItemId dentro del documento, ya es el ID.
-            delete newItemData.cartItemId; 
+            delete newItemData.cartItemId; // No es necesario guardar el ID dentro del documento
             await setDoc(cartItemRef, newItemData);
         }
 

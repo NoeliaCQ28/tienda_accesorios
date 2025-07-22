@@ -69,8 +69,6 @@
   background-color: var(--color-primario-oscuro);
 }
 
-/* Añade esto al final de src/pages/Admin.css */
-
 .product-list-container {
   margin-top: 50px;
   padding: 30px;
@@ -145,8 +143,6 @@
   color: white;
 }
 
-/* Añade esto al final de src/pages/Admin.css */
-
 .form-buttons {
   display: flex;
   gap: 15px;
@@ -174,7 +170,6 @@
   background-color: #5a6268;
 }
 
-/* Añade esto a src/pages/Admin.css */
 .admin-header {
   display: flex;
   justify-content: space-between;
@@ -186,15 +181,12 @@
   padding: 12px 25px;
 }
 
-/* Añade esto al final de src/pages/Admin.css */
-
-/* Controles de la lista (título y búsqueda) */
 .list-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
+  flex-wrap: wrap; 
   gap: 15px;
 }
 
@@ -207,26 +199,24 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   width: 100%;
-  max-width: 300px; /* Ancho máximo para la barra de búsqueda */
+  max-width: 300px; 
   font-size: 1rem;
 }
 
-/* Contenedor de la tabla para permitir scroll horizontal si es necesario */
 .table-container {
   overflow-x: auto;
 }
 
-/* Estilos de la tabla */
 .product-table {
   width: 100%;
-  border-collapse: collapse; /* Une los bordes de las celdas */
+  border-collapse: collapse; 
   text-align: left;
 }
 
 .product-table th, .product-table td {
   padding: 15px;
   border-bottom: 1px solid #f0f0f0;
-  vertical-align: middle; /* Alinea el contenido verticalmente al centro */
+  vertical-align: middle; 
 }
 
 .product-table thead {
@@ -263,7 +253,6 @@
   text-align: center;
 }
 
-/* Renombramos el botón principal para que sea más específico */
 .admin-header .btn-add-new {
   background-color: var(--color-primario);
   color: white;
@@ -278,12 +267,10 @@
   background-color: var(--color-primario-oscuro);
 }
 
-/* Añade esto al final de src/pages/Admin.css */
-
 .filters {
   display: flex;
-  gap: 15px; /* Espacio entre el desplegable y la barra de búsqueda */
-  flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
+  gap: 15px; 
+  flex-wrap: wrap; 
 }
 
 .category-filter, .search-input {
@@ -298,16 +285,15 @@
   background-color: white;
   cursor: pointer;
 }
-/* Añade esto al final de src/pages/Admin.css */
 
 .admin-header-actions {
   display: flex;
-  gap: 15px; /* Espacio entre los botones */
+  gap: 15px; 
   align-items: center;
 }
 
 .btn-logout {
-  background-color: #6c757d; /* Gris */
+  background-color: #6c757d; 
   color: white;
   padding: 12px 20px;
   text-decoration: none;
@@ -321,8 +307,6 @@
 .btn-logout:hover {
   background-color: #5a6268;
 }
-
-/* Añade esto al final de src/pages/Admin.css */
 
 .forgot-password {
   text-align: right;
@@ -338,3 +322,65 @@
   color: var(--color-primario-oscuro);
   text-decoration: underline;
 }
+
+/* --- INICIO DE LA MODIFICACIÓN --- */
+/* Estilos mejorados para la sección de personalización en el formulario de admin */
+
+.customization-section {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+html[data-theme='dark'] .customization-section {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.customization-section-title {
+  font-family: var(--font-titulos);
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1rem;
+  color: var(--color-texto);
+}
+html[data-theme='dark'] .customization-section-title {
+  border-color: #444;
+}
+
+.customization-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.customization-checkbox-group label {
+  margin: 0;
+  font-weight: 500;
+}
+
+.customization-checkbox-group input[type="checkbox"] {
+  width: 1.15em;
+  height: 1.15em;
+  accent-color: var(--color-primario);
+}
+
+.customization-max-length-group {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.customization-max-length-group label {
+  margin: 0;
+}
+
+.customization-max-length-group input {
+  width: 80px;
+  padding: 8px;
+}
+/* --- FIN DE LA MODIFICACIÓN --- */

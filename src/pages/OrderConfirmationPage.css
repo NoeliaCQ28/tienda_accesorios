@@ -35,7 +35,6 @@
   margin-bottom: 2rem;
 }
 
-/* ***** INICIO DE NUEVOS ESTILOS ***** */
 .order-summary-card {
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-borde);
@@ -87,12 +86,6 @@
   font-weight: 600;
 }
 
-.item-customization {
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: 4px;
-}
-
 .item-price {
   font-weight: 600;
 }
@@ -104,7 +97,6 @@
   font-family: var(--font-titulos);
 }
 
-/* ***** FIN DE NUEVOS ESTILOS ***** */
 
 .payment-instructions-card {
   background-color: #fafafa;
@@ -171,3 +163,32 @@ html[data-theme='dark'] .payment-instructions-card {
     font-weight: normal;
     color: var(--color-primario);
 }
+
+/* --- INICIO DE LA MODIFICACIÓN --- */
+/* Estilos para las personalizaciones */
+.item-customization {
+  font-size: 0.85rem; /* 13.6px */
+  color: var(--color-texto-claro);
+  margin-top: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: var(--color-secundario);
+  border: 1px solid var(--color-borde);
+  display: inline-block; /* Ajusta el fondo al texto */
+}
+
+/* Estilo adicional para el texto, para diferenciarlo del color */
+.item-customization.text {
+  font-style: italic;
+  background-color: #eef2ff;
+  border-color: #dbeafe;
+  color: #4338ca;
+  margin-top: 4px; /* Un poco de espacio si hay color y texto */
+}
+
+html[data-theme='dark'] .item-customization.text {
+  background-color: #312e71;
+  border-color: #4338ca;
+  color: #c7d2fe;
+}
+/* --- FIN DE LA MODIFICACIÓN --- */

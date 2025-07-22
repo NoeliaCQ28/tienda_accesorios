@@ -4,17 +4,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { CartContext } from '../context/CartContext';
+import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './ProductDetailPage.css';
-
-// 1. Importa el nuevo componente de selección de color
 import ProductColorSelector from '../components/ProductColorSelector';
 
 const ProductDetailPage = () => {
     const { productId } = useParams();
-    const { addItem } = useContext(CartContext);
+    const { addItem } = useCart();
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
@@ -22,22 +20,24 @@ const ProductDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     
-    // 2. Añade un estado para el color seleccionado
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // 1. El estado `selectedColor` ahora puede ser:
+    //    null: Aún no se ha decidido nada.
+    //    'original': El cliente ha confirmado que quiere los colores por defecto.
+    //    {objeto}: El cliente ha elegido un color específico.
     const [selectedColor, setSelectedColor] = useState(null);
+    const [customText, setCustomText] = useState("");
+    // --- FIN DE LA MODIFICACIÓN ---
 
     useEffect(() => {
         const fetchProduct = async () => {
             setLoading(true);
             try {
-                // ***** CORRECCIÓN AQUÍ *****
-                // Cambiamos 'products' por 'productos' para que coincida con tu base de datos
                 const productRef = doc(db, 'productos', productId);
                 const docSnap = await getDoc(productRef);
-
                 if (docSnap.exists()) {
                     setProduct({ id: docSnap.id, ...docSnap.data() });
                 } else {
-                    console.log("No such document!"); // Esto causaba el error en la consola
                     toast.error("Producto no encontrado.");
                 }
             } catch (error) {
@@ -52,23 +52,31 @@ const ProductDetailPage = () => {
     const handleAddToCart = () => {
         if (!product) return;
         
-        // 3. Verifica si se requiere personalización y si se ha completado
         const isBracelet = product.tags && product.tags.includes('pulseras');
-        if (isBracelet && !selectedColor) {
-            toast.error("Por favor, selecciona un color para personalizar tu pulsera.");
+        if (isBracelet && selectedColor === null) {
+            toast.error("Por favor, elige una opción de color para continuar.");
             return;
         }
 
         if (currentUser) {
-            // 4. Añade la información del color al producto antes de enviarlo al carrito
-            const productToAdd = {
-              ...product,
-              // Añadimos un objeto 'customization' si se seleccionó un color
-              customization: selectedColor ? {
+            const colorCustomization = selectedColor && selectedColor !== 'original' ? {
                 type: 'Color',
                 value: selectedColor.name,
                 color: selectedColor.color,
-              } : null,
+            } : null;
+
+            const textCustomization = product.customizable && customText.trim() ? {
+                type: 'Texto',
+                value: customText.trim(),
+            } : null;
+
+            const productToAdd = {
+              ...product,
+              quantity,
+              customization: {
+                color: colorCustomization,
+                text: textCustomization,
+              }
             };
 
             addItem(productToAdd, quantity);
@@ -82,27 +90,21 @@ const ProductDetailPage = () => {
     if (loading) return <div className="detail-loading">Cargando producto...</div>;
     if (!product) return <div className="detail-loading">Producto no encontrado.</div>;
     
-    // Lógica para deshabilitar el botón de añadir si es pulsera y no se ha elegido color
     const isBracelet = product.tags && product.tags.includes('pulseras');
-    const isAddToCartDisabled = isBracelet && !selectedColor;
+    // 2. Lógica corregida: el botón SÓLO se deshabilita si es una pulsera y no se ha tomado ninguna decisión (selectedColor es null).
+    const isAddToCartDisabled = isBracelet && selectedColor === null;
 
     return (
         <div className="product-detail-page">
             <div className="product-detail-layout">
                 <div className="product-images">
                     <img src={product.imagenUrl} alt={product.nombre} className="main-image" />
-                    {/* Muestra una vista previa del color seleccionado */}
-                    {selectedColor && (
-                        <div style={{marginTop: '1rem', padding: '1rem', backgroundColor: '#f9f9f9', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '1rem'}}>
-                            <p style={{margin: 0, fontWeight: 'bold'}}>Color:</p>
+                    {selectedColor && typeof selectedColor === 'object' && (
+                         <div className="color-preview-container">
+                            <p className="color-preview-text">Color:</p>
                             <div 
-                                style={{ 
-                                    width: '24px', 
-                                    height: '24px', 
-                                    borderRadius: '50%', 
-                                    background: selectedColor.color,
-                                    border: selectedColor.color === '#FFFFFF' ? '1px solid #ddd' : 'none' 
-                                }}
+                                className="color-preview-dot"
+                                style={{ background: selectedColor.color, border: selectedColor.color === '#FFFFFF' ? '1px solid #ddd' : 'none' }}
                             />
                             <span>{selectedColor.name}</span>
                         </div>
@@ -114,10 +116,29 @@ const ProductDetailPage = () => {
                     <p className="product-detail-price">S/ {product.precio.toFixed(2)}</p>
                     <p className="product-detail-description">{product.descripcion}</p>
                     
-                    {/* 5. Renderiza el componente selector de color si es una pulsera */}
-                    {isBracelet && (
-                        <ProductColorSelector product={product} onColorChange={setSelectedColor} />
-                    )}
+                    <div className="customization-container">
+                        {isBracelet && (
+                            <ProductColorSelector product={product} onColorChange={setSelectedColor} />
+                        )}
+
+                        {product.customizable && (
+                            <div className="text-customization-container">
+                                <label htmlFor="customText">Añade tu texto (opcional):</label>
+                                <input
+                                    type="text"
+                                    id="customText"
+                                    placeholder="Ej: J❤️L"
+                                    value={customText}
+                                    onChange={(e) => setCustomText(e.target.value)}
+                                    maxLength={product.customizationMaxLength}
+                                    className="custom-text-input"
+                                />
+                                <small className="char-counter">
+                                    {customText.length} / {product.customizationMaxLength} caracteres
+                                </small>
+                            </div>
+                        )}
+                    </div>
                     
                     <div className="product-actions">
                         <div className="quantity-selector">
@@ -130,7 +151,8 @@ const ProductDetailPage = () => {
                             onClick={handleAddToCart}
                             disabled={isAddToCartDisabled}
                         >
-                            {isAddToCartDisabled ? 'Elige un color' : 'Añadir al Carrito'}
+                            {/* 3. El texto del botón ahora es más genérico cuando está deshabilitado. */}
+                            {isAddToCartDisabled ? 'Elige una opción' : 'Añadir al Carrito'}
                         </button>
                     </div>
 

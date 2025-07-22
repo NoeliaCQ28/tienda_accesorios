@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, storage } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import toast from 'react-hot-toast';
 import '../Admin.css';
 
@@ -19,6 +19,11 @@ const EditProduct = () => {
   const [existingImageUrl, setExistingImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // --- INICIO DE LA MODIFICACIÓN ---
+  const [customizable, setCustomizable] = useState(false);
+  const [customizationMaxLength, setCustomizationMaxLength] = useState(0);
+  // --- FIN DE LA MODIFICACIÓN ---
+
   useEffect(() => {
     const getProduct = async () => {
       const productDocRef = doc(db, 'productos', productId);
@@ -32,6 +37,10 @@ const EditProduct = () => {
         setStock(productData.stock.toString());
         setTags(productData.tags ? productData.tags.join(', ') : '');
         setExistingImageUrl(productData.imagenUrl);
+        // --- INICIO DE LA MODIFICACIÓN: CARGAR DATOS EXISTENTES ---
+        setCustomizable(productData.customizable || false);
+        setCustomizationMaxLength(productData.customizationMaxLength || 0);
+        // --- FIN DE LA MODIFICACIÓN: CARGAR DATOS EXISTENTES ---
       } else {
         toast.error("No se encontró el producto para editar!");
         navigate('/admin');
@@ -51,24 +60,43 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // --- INICIO DE LA MODIFICACIÓN: VALIDACIÓN ---
+    let finalMaxLength = 0;
+    if (customizable) {
+        if (!customizationMaxLength || customizationMaxLength < 1) {
+            toast.error("Si el producto es personalizable, el máximo de caracteres debe ser al menos 1.");
+            return;
+        }
+        finalMaxLength = parseInt(customizationMaxLength, 10);
+    }
+    // --- FIN DE LA MODIFICACIÓN: VALIDACIÓN ---
+
     const promise = new Promise(async (resolve, reject) => {
         try {
             let imageUrl = existingImageUrl;
 
             if (imageFile) {
+                // Opcional: Borrar la imagen antigua si se sube una nueva
+                if (existingImageUrl) {
+                    const oldImageRef = ref(storage, existingImageUrl);
+                    try {
+                        await deleteObject(oldImageRef);
+                    } catch (error) {
+                        console.warn("La imagen anterior no se pudo borrar, puede que no existiera:", error);
+                    }
+                }
                 const storageRef = ref(storage, `product-images/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
                 imageUrl = await getDownloadURL(storageRef);
             }
 
-            // Lógica mejorada para procesar las etiquetas
             const initialTags = tags.split(',').map(tag => tag.trim().toLowerCase());
             const expandedTags = new Set(initialTags);
 
             initialTags.forEach(tag => {
                 const subTags = tag.split(/[\s-]+/);
                 if (subTags.length > 1) {
-                subTags.forEach(subTag => expandedTags.add(subTag));
+                    subTags.forEach(subTag => expandedTags.add(subTag));
                 }
             });
 
@@ -82,6 +110,10 @@ const EditProduct = () => {
                 stock: Number(stock),
                 tags: Array.from(expandedTags),
                 imagenUrl: imageUrl,
+                // --- INICIO DE LA MODIFICACIÓN: GUARDADO DE DATOS ---
+                customizable: customizable,
+                customizationMaxLength: finalMaxLength,
+                // --- FIN DE LA MODIFICACIÓN: GUARDADO DE DATOS ---
             };
 
             await updateDoc(productDocRef, updatedData);
@@ -117,6 +149,33 @@ const EditProduct = () => {
           <label>Etiquetas (separadas por comas)</label>
           <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} required />
         </div>
+        
+        {/* --- INICIO DE LA MODIFICACIÓN: CAMPOS EN EL FORMULARIO --- */}
+        <div className="customization-fields">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={customizable}
+              onChange={(e) => setCustomizable(e.target.checked)}
+            />
+            ¿Permitir texto personalizado?
+          </label>
+
+          {customizable && (
+            <div className="max-length-input">
+              <label htmlFor="maxLength">Máximo de caracteres:</label>
+              <input
+                id="maxLength"
+                type="number"
+                value={customizationMaxLength}
+                onChange={(e) => setCustomizationMaxLength(e.target.value)}
+                min="1"
+              />
+            </div>
+          )}
+        </div>
+        {/* --- FIN DE LA MODIFICACIÓN: CAMPOS EN EL FORMULARIO --- */}
+
         <div className="form-group">
           <label>Imagen Actual</label>
           {existingImageUrl && <img src={existingImageUrl} alt="Imagen actual" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}/>}

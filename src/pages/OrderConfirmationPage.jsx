@@ -138,8 +138,7 @@ const OrderConfirmationPage = () => {
           <h2>¡Tu orden fue recibida!</h2>
           <p className="order-number">Pedido: #{order.id.substring(0, 8).toUpperCase()}</p>
         </div>
-
-        {/* ***** INICIO DE LA MODIFICACIÓN ***** */}
+        
         <div className="order-summary-card">
           <h4>Resumen de tu Compra</h4>
           <ul className="order-summary-list">
@@ -148,11 +147,20 @@ const OrderConfirmationPage = () => {
                 <img src={item.imagenUrl} alt={item.nombre} className="summary-item-thumbnail" />
                 <div className="summary-item-info">
                   <span className="item-name">{item.quantity} x {item.nombre}</span>
-                  {item.customization && (
+                  {/* --- INICIO DE LA MODIFICACIÓN --- */}
+                  {/* Muestra el color si existe */}
+                  {item.customization && item.customization.color && (
                     <span className="item-customization">
-                      (Color: {item.customization.value})
+                      Color: {item.customization.color.value}
                     </span>
                   )}
+                  {/* Muestra el texto si existe */}
+                  {item.customization && item.customization.text && (
+                    <span className="item-customization text">
+                      Texto: "{item.customization.text.value}"
+                    </span>
+                  )}
+                  {/* --- FIN DE LA MODIFICACIÓN --- */}
                 </div>
                 <span className="item-price">S/ {(item.precio * item.quantity).toFixed(2)}</span>
               </li>
@@ -162,7 +170,6 @@ const OrderConfirmationPage = () => {
             <strong>Total del Pedido: S/ {order.total.toFixed(2)}</strong>
           </div>
         </div>
-        {/* ***** FIN DE LA MODIFICACIÓN ***** */}
         
         {renderPaymentDetails()}
 

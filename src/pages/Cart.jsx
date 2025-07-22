@@ -32,14 +32,21 @@ const Cart = () => {
             <div className="cart-item-details">
               <h3>{item.nombre}</h3>
               
-              {/* ***** INICIO DE LA MODIFICACIÓN ***** */}
-              {/* Si el item tiene personalización (color), la mostramos aquí */}
-              {item.customization && (
+              {/* --- INICIO DE LA MODIFICACIÓN --- */}
+              {/* Muestra el color si existe */}
+              {item.customization && item.customization.color && (
                 <p className="cart-item-customization">
-                  Color: {item.customization.value}
+                  Color: {item.customization.color.value}
                 </p>
               )}
-              {/* ***** FIN DE LA MODIFICACIÓN ***** */}
+
+              {/* Muestra el texto personalizado si existe */}
+              {item.customization && item.customization.text && (
+                <p className="cart-item-customization text">
+                  Texto: "{item.customization.text.value}"
+                </p>
+              )}
+              {/* --- FIN DE LA MODIFICACIÓN --- */}
 
               <p>Precio unitario: S/ {item.precio.toFixed(2)}</p>
               

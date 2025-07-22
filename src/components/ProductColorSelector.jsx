@@ -1,5 +1,6 @@
-// Ruta: src/components/ProductColorSelector.jsx
-import React, { useState } from 'react';
+// src/components/ProductColorSelector.jsx
+
+import React, { useState, useEffect } from 'react';
 import { colorCatalog } from '../data/colorCatalog';
 
 const ProductColorSelector = ({ product, onColorChange }) => {
@@ -7,28 +8,38 @@ const ProductColorSelector = ({ product, onColorChange }) => {
   const [selectedFamily, setSelectedFamily] = useState(null);
   const [selectedTone, setSelectedTone] = useState(null);
 
+  // --- INICIO DE LA MODIFICACIÓN ---
+  // Cuando el componente se monta por primera vez, si hay pulseras,
+  // la opción por defecto es mantener los colores originales.
+  useEffect(() => {
+    onColorChange('original');
+  }, []);
+
   const handleToggleCustom = (isCustom) => {
     setUseCustom(isCustom);
     if (!isCustom) {
       setSelectedFamily(null);
       setSelectedTone(null);
-      onColorChange(null);
+      // Cuando se elige "Mantener Colores", enviamos la señal 'original'
+      onColorChange('original');
     } else {
-        // Al activar la personalización, seleccionamos 'Mantener Colores' por defecto
-        onColorChange({ name: 'Colores Originales', color: 'default' });
+      // Cuando se activa "Personalizar", volvemos al estado indefinido (null)
+      // para forzar al usuario a elegir un tono.
+      onColorChange(null);
     }
   };
 
   const handleFamilySelect = (familyKey) => {
     setSelectedFamily(familyKey);
     setSelectedTone(null);
+    // Mientras no se elija un tono, la selección es indefinida (null)
     onColorChange(null);
   };
+  // --- FIN DE LA MODIFICACIÓN ---
 
   const handleToneSelect = (tone) => {
     setSelectedTone(tone);
     onColorChange({
-      family: colorCatalog[selectedFamily].name,
       name: tone.name,
       color: tone.color,
     });

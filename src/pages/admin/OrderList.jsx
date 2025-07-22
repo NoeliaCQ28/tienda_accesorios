@@ -174,22 +174,28 @@ const OrderList = () => {
                   <div className="detail-section products-section">
                     <strong>Productos:</strong>
                     <ul>
-                       {/* ***** INICIO DE LA MODIFICACIÓN ***** */}
+                       {/* --- INICIO DE LA MODIFICACIÓN --- */}
                       {order.items.map((item, index) => (
                         <li key={`${item.id}-${index}`}>
                           <img src={item.imagenUrl} alt={item.nombre} />
                           <div>
                             <span>{item.quantity} x {item.nombre}</span>
-                            {/* Si el item tiene personalización, la mostramos aquí */}
-                            {item.customization && (
+                            {/* Mostramos el color si existe */}
+                            {item.customization && item.customization.color && (
                               <div className="customization-detail">
-                                <strong>Personalización:</strong> {item.customization.value}
+                                <strong>Color:</strong> {item.customization.color.value}
+                              </div>
+                            )}
+                            {/* Mostramos el texto si existe */}
+                            {item.customization && item.customization.text && (
+                              <div className="customization-detail text">
+                                <strong>Texto:</strong> "{item.customization.text.value}"
                               </div>
                             )}
                           </div>
                         </li>
                       ))}
-                       {/* ***** FIN DE LA MODIFICACIÓN ***** */}
+                       {/* --- FIN DE LA MODIFICACIÓN --- */}
                     </ul>
                   </div>
                   <div className="detail-section customer-section">

@@ -15,6 +15,9 @@ const AddProduct = () => {
   const [tags, setTags] = useState('');
   const navigate = useNavigate();
 
+  const [customizable, setCustomizable] = useState(false);
+  const [customizationMaxLength, setCustomizationMaxLength] = useState(5);
+
   const handleImageChange = (e) => {
     if (e.target.files[0]) {
       setImageFile(e.target.files[0]);
@@ -28,13 +31,21 @@ const AddProduct = () => {
       return;
     }
 
+    let finalMaxLength = 0;
+    if (customizable) {
+      if (!customizationMaxLength || customizationMaxLength < 1) {
+        toast.error("Si el producto es personalizable, el máximo de caracteres debe ser al menos 1.");
+        return;
+      }
+      finalMaxLength = parseInt(customizationMaxLength, 10);
+    }
+
     const promise = new Promise(async (resolve, reject) => {
       try {
         const storageRef = ref(storage, `product-images/${Date.now()}_${imageFile.name}`);
         await uploadBytes(storageRef, imageFile);
         const imageUrl = await getDownloadURL(storageRef);
 
-        // Lógica mejorada para procesar las etiquetas
         const initialTags = tags.split(',').map(tag => tag.trim().toLowerCase());
         const expandedTags = new Set(initialTags); 
 
@@ -45,7 +56,7 @@ const AddProduct = () => {
           }
         });
         
-        await addDoc(collection(db, 'productos'), {
+        const newProductData = {
           nombre: nombre,
           nombre_lowercase: nombre.toLowerCase(),
           descripcion: descripcion,
@@ -53,7 +64,11 @@ const AddProduct = () => {
           stock: Number(stock),
           tags: Array.from(expandedTags),
           imagenUrl: imageUrl,
-        });
+          customizable: customizable,
+          customizationMaxLength: finalMaxLength,
+        };
+        
+        await addDoc(collection(db, 'productos'), newProductData);
 
         navigate('/admin');
         resolve("¡Producto añadido con éxito!");
@@ -82,6 +97,35 @@ const AddProduct = () => {
           <label>Etiquetas (separadas por comas)</label>
           <input type="text" placeholder="Ej: pulseras, murano, para-parejas" value={tags} onChange={(e) => setTags(e.target.value)} required />
         </div>
+        
+        {/* --- INICIO DE LA MODIFICACIÓN: SECCIÓN DE PERSONALIZACIÓN MEJORADA --- */}
+        <div className="customization-section">
+          <h4 className="customization-section-title">Opciones de Personalización de Texto</h4>
+          <div className="customization-checkbox-group">
+            <input
+              type="checkbox"
+              id="customizable-checkbox"
+              checked={customizable}
+              onChange={(e) => setCustomizable(e.target.checked)}
+            />
+            <label htmlFor="customizable-checkbox">Permitir texto personalizado en este producto</label>
+          </div>
+
+          {customizable && (
+            <div className="customization-max-length-group">
+              <label htmlFor="maxLength">Máximo de caracteres:</label>
+              <input
+                id="maxLength"
+                type="number"
+                value={customizationMaxLength}
+                onChange={(e) => setCustomizationMaxLength(e.target.value)}
+                min="1"
+              />
+            </div>
+          )}
+        </div>
+        {/* --- FIN DE LA MODIFICACIÓN --- */}
+
         <div className="form-group">
           <label htmlFor="file-upload" className="file-input-label">{imageFile ? `Archivo: ${imageFile.name}` : "Seleccionar Archivo"}</label>
           <input id="file-upload" type="file" accept="image/*" onChange={handleImageChange} required />
