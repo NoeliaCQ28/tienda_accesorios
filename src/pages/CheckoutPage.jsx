@@ -157,6 +157,12 @@ const CheckoutPage = () => {
             cart={cart}
             totalAmount={finalTotal}
             currentUser={currentUser}
+            // --- INICIO DE LA MODIFICACIÓN ---
+            // Pasamos los IDs de la ubicación seleccionada como props
+            departmentId={selectedDeptId}
+            provinceId={selectedProvId}
+            districtId={selectedDistId}
+            // --- FIN DE LA MODIFICACIÓN ---
           />
         )}
       </div>
@@ -165,8 +171,6 @@ const CheckoutPage = () => {
         <h3>Resumen del Pedido</h3>
         {cart.length > 0 ? (
           cart.map(item => (
-            // --- INICIO DE LA MODIFICACIÓN ---
-            // Usamos cartItemId como key para asegurar que sea único
             <div key={item.cartItemId} className="summary-item">
               <div className="summary-item-image">
                 <img src={item.imagenUrl} alt={item.nombre} />
@@ -174,13 +178,11 @@ const CheckoutPage = () => {
               </div>
               <div className="summary-item-details">
                 <strong>{item.nombre}</strong>
-                {/* Mostramos el color si existe */}
                 {item.customization && item.customization.color && (
                   <span className="summary-item-customization">
                     Color: {item.customization.color.value}
                   </span>
                 )}
-                {/* Mostramos el texto si existe */}
                 {item.customization && item.customization.text && (
                   <span className="summary-item-customization text">
                     Texto: "{item.customization.text.value}"
@@ -191,7 +193,6 @@ const CheckoutPage = () => {
                 <span>S/ {(item.precio * item.quantity).toFixed(2)}</span>
               </div>
             </div>
-            // --- FIN DE LA MODIFICACIÓN ---
           ))
         ) : <p>Tu carrito está vacío.</p>}
         <div className="summary-totals">

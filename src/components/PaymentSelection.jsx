@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+
+// --- INICIO DE LA MODIFICACIÓN ---
+// 1. Importamos los datos de ubicación para poder buscar los nombres
+import allDepartments from '../data/departamentos.json';
+import allProvinces from '../data/provincias.json';
+import allDistricts from '../data/distritos.json';
+// --- FIN DE LA MODIFICACIÓN ---
 
 // Tus importaciones de íconos
 import yapeIcon from '../assets/yape-logo.png';
@@ -14,7 +21,8 @@ import izipayIcon from '../assets/izipay-logo.png';
 
 import './PaymentSelection.css';
 
-const PaymentSelection = ({ customerData, shippingOption, cart, totalAmount, currentUser }) => {
+// 2. El componente ahora recibe los IDs de la ubicación seleccionada desde CheckoutPage
+const PaymentSelection = ({ customerData, shippingOption, cart, totalAmount, currentUser, departmentId, provinceId, districtId }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
@@ -41,34 +49,43 @@ const PaymentSelection = ({ customerData, shippingOption, cart, totalAmount, cur
     toast.loading('Procesando tu pedido...');
 
     try {
+      // --- INICIO DE LA MODIFICACIÓN ---
+      // 3. Buscamos los nombres correspondientes a los IDs
+      const departmentName = allDepartments.find(d => d.id_ubigeo === departmentId)?.nombre_ubigeo || '';
+      const provinceName = allProvinces[departmentId]?.find(p => p.id_ubigeo === provinceId)?.nombre_ubigeo || '';
+      const districtName = allDistricts[provinceId]?.find(d => d.id_ubigeo === districtId)?.nombre_ubigeo || '';
+      // --- FIN DE LA MODIFICACIÓN ---
+
       const orderData = {
         customer: {
             ...customerData,
-            email: currentUser.email
+            uid: currentUser.uid, // Guardamos el UID del usuario
+            email: currentUser.email,
+            // --- INICIO DE LA MODIFICACIÓN ---
+            // 4. Guardamos los nombres en el objeto del cliente dentro de la orden
+            departamento: departmentName,
+            provincia: provinceName,
+            distrito: districtName,
+            // --- FIN DE LA MODIFICACIÓN ---
         },
         shipping: shippingOption,
         items: cart,
         total: totalAmount,
         paymentMethod: selectedPayment.id,
         status: selectedPayment.id === 'whatsapp' ? 'pending_whatsapp' : 'pending_payment',
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(collection(db, "orders"), orderData);
-      const orderId = docRef.id.substring(0, 7).toUpperCase();
       
       toast.dismiss();
-      clearCart();
+      await clearCart();
 
       if (selectedPayment.id === 'whatsapp') {
+        const orderId = docRef.id.substring(0, 7).toUpperCase();
         const message = `¡Hola! Quiero coordinar el pago de mi pedido: #${orderId}`;
-        
-        // --- ¡CAMBIO CLAVE AQUÍ! ---
-        // Usamos el formato de enlace wa.me que es más moderno y fiable.
-        const whatsappUrl = `https://wa.me/51987869687?text=${encodeURIComponent(message)}`; // Reemplaza con tu número
-        
+        const whatsappUrl = `https://wa.me/51987869687?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
-        
         navigate('/cuenta');
         toast.success("Te hemos redirigido a WhatsApp. ¡Tu pedido ha sido guardado!");
       } else {
