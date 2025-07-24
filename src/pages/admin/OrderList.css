@@ -148,3 +148,386 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+
+/* Estilos adicionales para OrderList.css */
+
+/* Estilos para la celda de acciones */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Botón de imprimir */
+.print-btn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.print-btn:hover {
+  background: linear-gradient(135deg, #218838, #1ba085);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.print-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+/* Mejoras para el botón de detalles */
+.details-btn-admin {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.details-btn-admin:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Responsive para dispositivos móviles */
+@media (max-width: 768px) {
+  .actions-cell {
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+  
+  .print-btn,
+  .details-btn-admin {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* Estilos para el estado de impresión */
+.printing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.printing-message {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Mejoras para la celda de estado */
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.status-select {
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: white;
+  min-width: 160px;
+}
+
+.save-status-btn {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  color: #212529;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+}
+
+.save-status-btn:hover {
+  background: linear-gradient(135deg, #e0a800, #d39e00);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Estilos adicionales para OrderList.css - Impresora térmica */
+
+/* Header section con estado de impresora */
+.order-list-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.thermal-printer-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.printer-status-indicator {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones de estado de impresora */
+.test-printer-btn,
+.refresh-status-btn {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.test-printer-btn:hover,
+.refresh-status-btn:hover {
+  background: linear-gradient(135deg, #5a6268, #495057);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Botón de impresión térmica */
+.print-thermal-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+}
+
+.print-thermal-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.print-thermal-btn:disabled {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(149, 165, 166, 0.2);
+}
+
+/* Mejoras para la celda de acciones */
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 200px;
+}
+
+/* Ajustar botón normal para que sea más pequeño */
+.print-btn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.print-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #218838, #1ba085);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.print-btn:disabled {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mejoras para el botón de detalles */
+.details-btn-admin {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.details-btn-admin:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Responsive para dispositivos móviles */
+@media (max-width: 768px) {
+  .order-list-header-section {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .thermal-printer-status {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .printer-status-indicator {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .actions-cell {
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .print-btn,
+  .print-thermal-btn,
+  .details-btn-admin {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* Animaciones de estado */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+.printer-status-indicator:has-text("🟢") {
+  animation: pulse-green 2s infinite;
+}
+
+.printer-status-indicator:has-text("🔴") {
+  animation: pulse-red 2s infinite;
+}
+
+/* Overlay mejorado */
+.printing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.printing-message {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+}
+
+.printing-message p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Estilos para indicadores de estado específicos */
+.thermal-printer-status .printer-status-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.thermal-printer-status .printer-status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.thermal-printer-status:hover .printer-status-indicator::before {
+  left: 100%;
+}
