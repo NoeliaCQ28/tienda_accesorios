@@ -20,17 +20,18 @@
   --font-cuerpo: 'Montserrat', sans-serif;
 }
 
+/* Propuesta para: src/App.css */
 html[data-theme='dark'] {
   --color-primario: #f06292;
   --color-primario-oscuro: #e91e63;
-  --color-secundario: #3c2f3d;
-  --color-fondo: #121212;
-  --color-superficie: #1e1e1e;
-  --color-borde: #333333;
-  --color-texto: #f0f0f0;
-  --color-texto-claro: #a0a0a0;
+  --color-secundario: #3c2f3d;    /* Un morado oscuro para fondos sutiles */
+  --color-fondo: #18191a;         /* Un gris muy oscuro, no negro puro */
+  --color-superficie: #242526;    /* Un gris un poco más claro para tarjetas y header */
+  --color-borde: #3a3b3c;         /* Borde sutil para separar elementos */
+  --color-texto: #e4e6eb;         /* Texto principal, no blanco puro */
+  --color-texto-claro: #b0b3b8;    /* Texto secundario */
   --color-footer: #1a1a1a;
-  --sombra: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* -- 2. ESTILOS BASE Y LAYOUT -- */
