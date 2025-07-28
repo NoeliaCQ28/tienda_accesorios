@@ -68,3 +68,89 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Estilos para filtros rápidos */
+.quick-filters {
+  margin-top: 2rem;
+  background-color: var(--color-superficie);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.quick-filters h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--color-texto);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.quick-filter-categories,
+.quick-filter-price {
+  margin-bottom: 1.5rem;
+}
+
+.quick-filter-categories:last-child,
+.quick-filter-price:last-child {
+  margin-bottom: 0;
+}
+
+.quick-filters h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--color-texto-secundario);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-filter-buttons button {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-superficie-secundaria, #f8f9fa);
+  border: 1px solid var(--color-borde, #e0e0e0);
+  border-radius: 20px;
+  color: var(--color-texto);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.quick-filter-buttons button:hover {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: white;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .search-overlay-backdrop {
+    padding-top: 5vh;
+    align-items: flex-start;
+  }
+
+  .search-overlay-content {
+    max-width: 90%;
+  }
+
+  .quick-filters {
+    margin-top: 1rem;
+    padding: 1rem;
+  }
+
+  .quick-filter-buttons {
+    gap: 0.4rem;
+  }
+
+  .quick-filter-buttons button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}

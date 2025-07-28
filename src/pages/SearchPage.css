@@ -1,36 +1,28 @@
-/* src/pages/CategoryPage.css */
+/* src/pages/SearchPage.css */
 
-.category-page {
-  width: 100%;
-}
-
-.category-header {
+.search-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
-.category-title {
+.search-title {
   flex: 1;
-  text-align: center;
 }
 
-.category-title h2 {
-  margin: 0 0 3.2rem 0; /* Espacio amplio debajo del título principal */
-  font-size: 2.5rem;
-  font-family: 'Montserrat', Arial, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.search-title h2 {
+  margin: 0 0 0.3rem 0;
+  color: var(--color-texto);
+  font-size: 1.6rem;
+  font-weight: 600;
 }
 
 .results-count {
-  margin-top: -2.2rem; /* Posicionar el subtítulo más cerca del título pero con espacio visual */
   color: var(--color-texto-secundario);
-  font-size: 1.1rem;
-  font-family: 'Montserrat', Arial, sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .loading-container {
@@ -68,7 +60,7 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  grid-column: 1 / -1;
+  grid-column: 1 / -1; /* Ocupa todo el ancho del grid */
 }
 
 .no-results h3 {
@@ -88,11 +80,12 @@
 
 /* Responsive */
 @media (min-width: 1024px) and (max-width: 1366px) {
-  .category-header {
+  /* Ajustes específicos para laptops */
+  .search-header {
     margin-bottom: 1.25rem;
   }
   
-  .category-title h2 {
+  .search-title h2 {
     font-size: 1.5rem;
   }
   
@@ -102,20 +95,20 @@
 }
 
 @media (max-width: 1024px) {
-  .category-title h2 {
+  .search-title h2 {
     font-size: 1.4rem;
   }
 }
 
 @media (max-width: 768px) {
-  .category-header {
+  .search-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
-  .category-title h2 {
-    font-size: 1.6rem;
+  .search-title h2 {
+    font-size: 1.4rem;
   }
 
   .loading-container {
@@ -136,5 +129,15 @@
 
   .no-results p {
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-title h2 {
+    font-size: 1.2rem;
+  }
+
+  .results-count {
+    font-size: 0.8rem;
   }
 }

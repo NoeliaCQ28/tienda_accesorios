@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ThemeProvider } from './context/ThemeContext'; // <-- 1. IMPORTAMOS EL THEME PROVIDER
+import { SearchProvider } from './context/SearchContext'; // <-- IMPORTAMOS EL SEARCH PROVIDER
 import App from './App.jsx';
 import './App.css';
 
@@ -14,10 +15,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          {/* 2. ENVOLVEMOS LA APP CON EL THEME PROVIDER */}
-          <ThemeProvider>
-            <App />
-          </ThemeProvider>
+          <SearchProvider>
+            {/* 2. ENVOLVEMOS LA APP CON EL THEME PROVIDER */}
+            <ThemeProvider>
+              <App />
+            </ThemeProvider>
+          </SearchProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>
