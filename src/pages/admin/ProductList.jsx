@@ -94,7 +94,7 @@ const ProductList = () => {
                   <td><img src={product.imagenUrl} alt={product.nombre} className="table-item-image" /></td>
                   <td>{product.nombre}</td>
                   <td>{product.tags ? product.tags.join(', ') : ''}</td>
-                  <td>S/ {product.precio ? product.precio.toFixed(2) : '0.00'}</td>
+                  <td>S/ {product.precioBase ? product.precioBase.toFixed(2) : '0.00'}</td>
                   <td>{product.stock}</td>
                   <td>
                     <div className="table-item-actions">

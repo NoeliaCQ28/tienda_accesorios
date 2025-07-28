@@ -16,16 +16,17 @@ const EditProduct = () => {
   // Estados para los campos básicos
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [precio, setPrecio] = useState('');
+  const [precioBase, setPrecioBase] = useState('');
   const [stock, setStock] = useState('');
   const [tags, setTags] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [existingImageUrl, setExistingImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Estado único para todas las personalizaciones
+  // --- NUEVO: Estado para gestionar las personalizaciones ---
   const [personalizaciones, setPersonalizaciones] = useState([]);
 
+  // --- MODIFICADO: useEffect para cargar TODOS los datos del producto, incluyendo personalizaciones ---
   useEffect(() => {
     const getProduct = async () => {
       const productDocRef = doc(db, 'productos', productId);
@@ -35,22 +36,32 @@ const EditProduct = () => {
         const productData = docSnap.data();
         setNombre(productData.nombre);
         setDescripcion(productData.descripcion || '');
-        setPrecio(productData.precioBase ? productData.precioBase.toString() : (productData.precio || '0').toString());
+        setPrecioBase(productData.precioBase ? productData.precioBase.toString() : '0');
         setStock(productData.stock.toString());
         setTags(productData.tags ? productData.tags.join(', ') : '');
         setExistingImageUrl(productData.imagenUrl);
-        
-        // Cargar las personalizaciones existentes y añadirles IDs temporales
+
+        // --- NUEVO: Cargar las personalizaciones existentes ---
+        // Les añadimos IDs temporales para que React pueda manejarlas en el formulario
         if (productData.personalizaciones) {
           const loadedPersonalizaciones = productData.personalizaciones.map(p => ({
             ...p,
-            id: Date.now() + Math.random(), 
-            opciones: p.opciones ? p.opciones.map(opt => ({ ...opt, id: Date.now() + Math.random() })) : [],
+            id: Date.now() + Math.random(), // ID temporal único para el bloque
+            // Para 'material', también añadimos IDs a las opciones
+            opciones: p.opciones && Array.isArray(p.opciones) 
+              ? p.opciones.map(opt => ({ 
+                  ...opt, 
+                  id: Date.now() + Math.random() // ID temporal único para la opción
+                })) 
+              : [],
+            // Para 'selector', unimos el array de nuevo en un string para el textarea
+            opcionesFijas: (p.tipo === 'selector' && Array.isArray(p.opciones)) ? p.opciones.join(', ') : '',
           }));
           setPersonalizaciones(loadedPersonalizaciones);
         }
+
       } else {
-        toast.error("No se encontró el producto para editar.");
+        toast.error("No se encontró el producto para editar!");
         navigate('/admin');
       }
       setLoading(false);
@@ -59,18 +70,9 @@ const EditProduct = () => {
     getProduct();
   }, [productId, navigate]);
   
-  // --- Funciones para gestionar el estado de las personalizaciones ---
+  // --- NUEVO: Todas las funciones para manejar el estado de las personalizaciones (idénticas a AddProduct.jsx) ---
   const addPersonalizacion = () => {
-    setPersonalizaciones([
-      ...personalizaciones,
-      {
-        id: Date.now(),
-        tipo: '', 
-        label: '',
-        opciones: [{ id: Date.now(), nombre: '', precio: 0 }],
-        maxLength: 10,
-      },
-    ]);
+    setPersonalizaciones([ ...personalizaciones, { id: Date.now(), tipo: '', label: '', opciones: [{ id: Date.now(), nombre: '', precio: 0 }], opcionesFijas: '', maxLength: 20 } ]);
   };
 
   const removePersonalizacion = (id) => {
@@ -78,32 +80,31 @@ const EditProduct = () => {
   };
 
   const handlePersonalizacionChange = (id, field, value) => {
-    const newPersonalizaciones = personalizaciones.map((p) => {
-      if (p.id === id) {
-        if (field === 'tipo' && value === 'colores') {
-          return { ...p, [field]: value, label: 'Elige una familia de colores' };
+    setPersonalizaciones(personalizaciones.map(p => {
+        if (p.id === id) {
+            let updatedP = { ...p, [field]: value };
+            if (field === 'tipo') {
+              updatedP.opciones = [{ id: Date.now(), nombre: '', precio: 0 }];
+              updatedP.opcionesFijas = '';
+              updatedP.maxLength = 20;
+              if (value === 'colores') updatedP.label = 'Elige una familia de colores';
+            }
+            return updatedP;
         }
-        if (field === 'maxLength') {
-          return { ...p, [field]: parseInt(value, 10) || 0 };
-        }
-        return { ...p, [field]: value };
-      }
-      return p;
-    });
-    setPersonalizaciones(newPersonalizaciones);
+        return p;
+    }));
   };
 
   const handleOptionChange = (pId, optionId, field, value) => {
     setPersonalizaciones(personalizaciones.map(p => {
       if (p.id === pId) {
-        const newOptions = p.opciones.map(opt => {
+        return { ...p, opciones: p.opciones.map(opt => {
           if (opt.id === optionId) {
             const finalValue = field === 'precio' ? parseFloat(value) || 0 : value;
             return { ...opt, [field]: finalValue };
           }
           return opt;
-        });
-        return { ...p, opciones: newOptions };
+        })};
       }
       return p;
     }));
@@ -138,12 +139,17 @@ const EditProduct = () => {
 
             const tagsArray = tags.split(',').map(tag => tag.trim().toLowerCase());
 
-            const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, maxLength }) => {
+            // Preparamos las personalizaciones para guardarlas, limpiando datos e IDs temporales
+            const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, opcionesFijas, maxLength }) => {
                 if (tipo === 'material') {
                     return { tipo, label, opciones: opciones.map(({ id, ...optRest }) => optRest).filter(opt => opt.nombre) };
                 }
                 if (tipo === 'texto') {
-                    return { tipo, label, maxLength };
+                    return { tipo, label, maxLength: Number(maxLength) };
+                }
+                if (tipo === 'selector') {
+                    const opcionesArray = opcionesFijas.split(',').map(opt => opt.trim()).filter(Boolean);
+                    return { tipo, label, opciones: opcionesArray };
                 }
                 if (tipo === 'colores') {
                     return { tipo, label: label || "Elige una familia de colores" };
@@ -152,10 +158,10 @@ const EditProduct = () => {
             }).filter(Boolean);
 
             const updatedData = {
-                nombre: nombre,
+                nombre,
                 nombre_lowercase: nombre.toLowerCase(),
-                descripcion: descripcion,
-                precioBase: Number(precio),
+                descripcion,
+                precioBase: Number(precioBase),
                 stock: Number(stock),
                 tags: tagsArray,
                 imagenUrl: imageUrl,
@@ -187,17 +193,19 @@ const EditProduct = () => {
         
         <div className="form-group"><label>Nombre</label><input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required /></div>
         <div className="form-group"><label>Descripción</label><textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} /></div>
-        <div className="form-group"><label>Precio Base (S/)</label><input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} required /></div>
+        <div className="form-group"><label>Precio Base (S/)</label><input type="number" value={precioBase} onChange={(e) => setPrecioBase(e.target.value)} required /></div>
         <div className="form-group"><label>Stock</label><input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required /></div>
         <div className="form-group"><label>Etiquetas</label><input type="text" value={tags} onChange={(e) => setTags(e.target.value)} required /></div>
         <div className="form-group"><label>Imagen Actual</label>{existingImageUrl && <img src={existingImageUrl} alt="Imagen actual" className="image-preview"/>}</div>
         <div className="form-group"><label htmlFor="file-upload" className="file-input-label">{imageFile ? `Nuevo: ${imageFile.name}` : "Cambiar Imagen"}</label><input id="file-upload" type="file" accept="image/*" onChange={handleImageChange} /></div>
 
+        {/* --- GESTOR DE PERSONALIZACIONES --- */}
         <div className="customization-manager">
           <h4>Gestor de Personalizaciones</h4>
           {personalizaciones.map((p) => (
             <div key={p.id} className="customization-block">
               <button type="button" className="btn-remove-block" onClick={() => removePersonalizacion(p.id)}>×</button>
+              
               <div className="form-row">
                 <div className="form-group">
                   <label>Tipo</label>
@@ -205,11 +213,12 @@ const EditProduct = () => {
                     <option value="" disabled>-- Elige un tipo --</option>
                     <option value="material">Material (con precio por opción)</option>
                     <option value="texto">Texto Personalizado</option>
+                    <option value="selector">Selector Fijo (ej. Letras)</option>
                     <option value="colores">Selector de Colores de Hilo</option>
                   </select>
                 </div>
-                {p.tipo !== 'colores' && (
-                  <div className="form-group"><label>Etiqueta</label><input type="text" placeholder="Ej: Elige el material" value={p.label} onChange={(e) => handlePersonalizacionChange(p.id, 'label', e.target.value)} /></div>
+                {p.tipo && p.tipo !== 'colores' && (
+                    <div className="form-group"><label>Etiqueta</label><input type="text" placeholder="Ej: Elige la inicial" value={p.label} onChange={(e) => handlePersonalizacionChange(p.id, 'label', e.target.value)}/></div>
                 )}
               </div>
               
@@ -228,15 +237,21 @@ const EditProduct = () => {
               )}
 
               {p.tipo === 'texto' && (
-                <div className="form-group">
-                    <label>Máximo de caracteres:</label>
-                    <input type="number" value={p.maxLength} onChange={(e) => handlePersonalizacionChange(p.id, 'maxLength', e.target.value)} min="1" />
-                </div>
+                <div className="form-group"><label>Máximo de caracteres:</label><input type="number" value={p.maxLength} onChange={(e) => handlePersonalizacionChange(p.id, 'maxLength', e.target.value)} min="1" /></div>
+              )}
+
+              {p.tipo === 'selector' && (
+                <div className="form-group"><label>Opciones (separadas por comas)</label><textarea placeholder="Ej: A, B, C, D, E..." value={p.opcionesFijas} onChange={(e) => handlePersonalizacionChange(p.id, 'opcionesFijas', e.target.value)} /></div>
+              )}
+
+              {p.tipo === 'colores' && (
+                <p className="customization-notice">Se mostrará el selector de colores de hilo estándar.</p>
               )}
             </div>
           ))}
           <button type="button" className="btn-add-block" onClick={addPersonalizacion}>+ Añadir Personalización</button>
         </div>
+        {/* --- FIN DEL GESTOR --- */}
 
         <div className="form-buttons">
           <button type="submit" className="submit-btn">Guardar Cambios</button>

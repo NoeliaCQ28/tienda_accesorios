@@ -24,6 +24,7 @@ const ProductDetailPage = () => {
     // --- ESTADOS PARA CADA TIPO DE PERSONALIZACIÓN ---
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
+    const [selectedOptions, setSelectedOptions] = useState({});
     // --- MODIFICADO: Estado para el texto ahora es un objeto ---
     const [customizationsText, setCustomizationsText] = useState({});
     const [totalPrice, setTotalPrice] = useState(0);
@@ -59,6 +60,7 @@ const ProductDetailPage = () => {
     // --- Buscamos TODAS las personalizaciones por tipo ---
     const materialCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'material') || [];
     const textCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'texto') || [];
+    const selectorCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'selector') || [];
     const colorCustomization = product?.personalizaciones?.find(p => p.tipo === 'colores');
 
     const handleMaterialSelect = (personalizacionLabel, option) => {
@@ -106,6 +108,12 @@ const ProductDetailPage = () => {
                     finalCustomizations.push({ type: parentCustomization.label, value: selectedMaterial.nombre });
                 }
             }
+
+            Object.entries(selectedOptions).forEach(([label, value]) => {
+                if (value) {
+                    finalCustomizations.push({ type: label, value });
+                }
+            });
             
             // Guardar textos personalizados
             Object.entries(customizationsText).forEach(([label, text]) => {
@@ -161,6 +169,16 @@ const ProductDetailPage = () => {
                                 customization={custom}
                                 selectedOption={selectedMaterial}
                                 onOptionSelect={(option) => handleMaterialSelect(custom.label, option)}
+                            />
+                        ))}
+
+                        {/* Selectores Fijos */}
+                        {selectorCustomizations.map(custom => (
+                            <ProductOptionSelector
+                                key={custom.label}
+                                customization={custom}
+                                selectedOption={selectedOptions[custom.label]}
+                                onOptionSelect={(option) => setSelectedOptions(prev => ({ ...prev, [custom.label]: option }))}
                             />
                         ))}
                         

@@ -191,8 +191,8 @@ function App() {
             <Route path="/order-confirmation/:orderId" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
             <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']}><AdminPage /></ProtectedRoute>} />
             {/* Las rutas anidadas de admin se manejan dentro de AdminPage, por lo que estas son redundantes y se pueden quitar */}
-            {/* <Route path="/admin/add" element={<ProtectedRoute allowedRoles={['admin']}><AddProduct /></ProtectedRoute>} /> */}
-            {/* <Route path="/admin/edit/:productId" element={<ProtectedRoute allowedRoles={['admin']}><EditProduct /></ProtectedRoute>} /> */}
+            <Route path="/admin/add" element={<ProtectedRoute allowedRoles={['admin']}><AddProduct /></ProtectedRoute>} />
+            <Route path="/admin/edit/:productId" element={<ProtectedRoute allowedRoles={['admin']}><EditProduct /></ProtectedRoute>} />
           </Routes>
         </main>
         <footer className="app-footer">

@@ -18,7 +18,6 @@ const AddProduct = () => {
   const [stock, setStock] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [tags, setTags] = useState('');
-
   const [personalizaciones, setPersonalizaciones] = useState([]);
 
   const addPersonalizacion = () => {
@@ -26,10 +25,12 @@ const AddProduct = () => {
       ...personalizaciones,
       {
         id: Date.now(),
-        tipo: '', // Forzar al usuario a elegir un tipo
+        tipo: '', // Forzar al admin a elegir un tipo
         label: '',
-        opciones: [{ id: Date.now(), nombre: '', precio: 0 }],
-        maxLength: 10,
+        // Atributos para cada tipo
+        opciones: [{ id: Date.now(), nombre: '', precio: 0 }], // Para 'material'
+        opcionesFijas: '', // Para 'selector' (se guardan como string separado por comas)
+        maxLength: 20, // Para 'texto'
       },
     ]);
   };
@@ -41,14 +42,14 @@ const AddProduct = () => {
   const handlePersonalizacionChange = (id, field, value) => {
     const newPersonalizaciones = personalizaciones.map((p) => {
       if (p.id === id) {
-        if (field === 'tipo' && value === 'colores') {
-          // Si eligen 'colores', pre-llenamos la etiqueta.
-          return { ...p, [field]: value, label: 'Elige una familia de colores' };
+        let updatedP = { ...p, [field]: value };
+        // Si cambia el tipo, reseteamos los valores de los otros tipos para evitar datos basura
+        if (field === 'tipo') {
+          updatedP.opciones = [{ id: Date.now(), nombre: '', precio: 0 }];
+          updatedP.opcionesFijas = '';
+          updatedP.maxLength = 20;
         }
-        if (field === 'maxLength') {
-          return { ...p, [field]: parseInt(value, 10) || 0 };
-        }
-        return { ...p, [field]: value };
+        return updatedP;
       }
       return p;
     });
@@ -97,24 +98,26 @@ const AddProduct = () => {
         const imageUrl = await getDownloadURL(storageRef);
         const tagsArray = tags.split(',').map(tag => tag.trim().toLowerCase());
 
-        // --- MODIFICADO: Limpieza de datos antes de guardar ---
-        const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, maxLength }) => {
+        // --- MODIFICADO: Preparamos los datos para CADA tipo de personalización ---
+        const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, opcionesFijas, maxLength }) => {
           if (tipo === 'material') {
             return { tipo, label, opciones: opciones.map(({ id, ...optRest }) => optRest).filter(opt => opt.nombre) };
           }
           if (tipo === 'texto') {
-            return { tipo, label, maxLength };
+            return { tipo, label, maxLength: Number(maxLength) };
           }
-          if (tipo === 'colores') {
-            return { tipo, label: label || "Elige una familia de colores" }; // Se guarda solo el tipo y la etiqueta
+          if (tipo === 'selector') {
+            // Convertimos el string "A, B, C" en un array ["A", "B", "C"]
+            const opcionesArray = opcionesFijas.split(',').map(opt => opt.trim()).filter(Boolean);
+            return { tipo, label, opciones: opcionesArray };
           }
           return null;
         }).filter(Boolean);
 
         const newProductData = {
-          nombre: nombre,
+          nombre,
           nombre_lowercase: nombre.toLowerCase(),
-          descripcion: descripcion,
+          descripcion,
           precioBase: Number(precio),
           stock: Number(stock),
           tags: tagsArray,
@@ -149,7 +152,8 @@ const AddProduct = () => {
         <div className="form-group"><label>Stock</label><input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required /></div>
         <div className="form-group"><label>Etiquetas</label><input type="text" placeholder="Ej: pulseras, hilo, para-parejas" value={tags} onChange={(e) => setTags(e.target.value)} required /></div>
         <div className="form-group"><label htmlFor="file-upload" className="file-input-label">{imageFile ? `Archivo: ${imageFile.name}` : "Seleccionar Archivo"}</label><input id="file-upload" type="file" accept="image/*" onChange={handleImageChange} required /></div>
-
+        
+        {/* --- GESTOR DE PERSONALIZACIONES MEJORADO --- */}
         <div className="customization-manager">
           <h4>Gestor de Personalizaciones</h4>
           {personalizaciones.map((p) => (
@@ -159,32 +163,20 @@ const AddProduct = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Tipo de Personalización</label>
-                  <select
-                    value={p.tipo}
-                    onChange={(e) => handlePersonalizacionChange(p.id, 'tipo', e.target.value)}
-                  >
+                  <select value={p.tipo} onChange={(e) => handlePersonalizacionChange(p.id, 'tipo', e.target.value)}>
                     <option value="" disabled>-- Elige un tipo --</option>
                     <option value="material">Material (con precio por opción)</option>
                     <option value="texto">Texto Personalizado</option>
-                    {/* --- NUEVO: Opción de Colores --- */}
+                    <option value="selector">Selector Fijo (ej. Letras)</option>
                     <option value="colores">Selector de Colores de Hilo</option>
                   </select>
                 </div>
-                
-                {/* La etiqueta se muestra para todos menos para 'colores' que es fija */}
-                {p.tipo !== 'colores' && (
-                    <div className="form-group">
-                        <label>Etiqueta para el cliente</label>
-                        <input
-                            type="text"
-                            placeholder="Ej: Elige el material del dije"
-                            value={p.label}
-                            onChange={(e) => handlePersonalizacionChange(p.id, 'label', e.target.value)}
-                        />
-                    </div>
+                {p.tipo && p.tipo !== 'colores' && (
+                    <div className="form-group"><label>Etiqueta para el cliente</label><input type="text" placeholder="Ej: Elige la inicial" value={p.label} onChange={(e) => handlePersonalizacionChange(p.id, 'label', e.target.value)}/></div>
                 )}
               </div>
 
+              {/* --- RENDERIZADO CONDICIONAL PARA CADA TIPO --- */}
               {p.tipo === 'material' && (
                 <>
                   <h5>Opciones de Material</h5>
@@ -205,6 +197,21 @@ const AddProduct = () => {
                     <input type="number" value={p.maxLength} onChange={(e) => handlePersonalizacionChange(p.id, 'maxLength', e.target.value)} min="1" />
                 </div>
               )}
+
+              {p.tipo === 'selector' && (
+                <div className="form-group">
+                    <label>Opciones (separadas por comas)</label>
+                    <textarea 
+                      placeholder="Ej: A, B, C, D, E..." 
+                      value={p.opcionesFijas}
+                      onChange={(e) => handlePersonalizacionChange(p.id, 'opcionesFijas', e.target.value)}
+                    />
+                </div>
+              )}
+
+              {p.tipo === 'colores' && (
+                <p className="customization-notice">Se mostrará el selector de colores de hilo estándar.</p>
+              )}
             </div>
           ))}
 
@@ -212,7 +219,7 @@ const AddProduct = () => {
             + Añadir Nueva Personalización
           </button>
         </div>
-
+        
         <div className="form-buttons">
           <button type="submit" className="submit-btn">Añadir Producto</button>
           <button type="button" className="btn-cancel" onClick={() => navigate('/admin')}>Cancelar</button>
