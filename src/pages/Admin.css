@@ -383,4 +383,22 @@ html[data-theme='dark'] .customization-section-title {
   width: 80px;
   padding: 8px;
 }
+
+/* src/pages/admin/Admin.css */
+
+/* ... (todo tu código CSS existente va aquí arriba) ... */
+
+
+/* --- NUEVO: Estilos para la previsualización de la imagen --- */
+.image-preview {
+  display: block; /* Asegura que ocupe su propia línea */
+  max-width: 200px; /* Limita el ancho máximo */
+  max-height: 200px; /* Limita la altura máxima */
+  width: auto;
+  height: auto;
+  margin-top: 10px; /* Espacio entre la etiqueta y la imagen */
+  border-radius: 8px; /* Bordes redondeados consistentes */
+  border: 1px solid var(--color-borde);
+  object-fit: cover; /* Asegura que la imagen no se distorsione */
+}
 /* --- FIN DE LA MODIFICACIÓN --- */

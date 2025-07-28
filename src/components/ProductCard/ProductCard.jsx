@@ -1,3 +1,5 @@
+// src/components/ProductCard.jsx
+
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -36,13 +38,26 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = (e) => {
     handleInteraction(e);
     if (currentUser) {
-      addItem(product, quantity);
+      // --- MODIFICACIÓN CLAVE ---
+      // Aseguramos que el precio que se añade al carrito es 'precioBase'
+      const productToAdd = {
+        ...product,
+        precio: product.precioBase // Añadimos el precio correcto al objeto
+      };
+      addItem(productToAdd, quantity);
       toast.success(`${quantity} x "${product.nombre}" añadido(s) al carrito.`);
     } else {
       toast.error("Debes iniciar sesión para añadir productos al carrito.");
       navigate('/login');
     }
   };
+
+  // --- CORRECCIÓN DEL ERROR ---
+  // Nos aseguramos de que el producto y el precio base existan antes de renderizar
+  if (!product || typeof product.precioBase === 'undefined') {
+    // Retornamos null o un loader para evitar que la app crashee si un producto no tiene precio
+    return null;
+  }
 
   return (
     <Link to={`/producto/${product.id}`} className="product-card-link">
@@ -53,9 +68,11 @@ const ProductCard = ({ product }) => {
           <p className="product-description">{product.descripcion}</p>
           
           <div className="product-purchase-section">
-            <p className="price">S/ {product.precio.toFixed(2)}</p>
+            {/* AQUÍ ESTÁ LA CORRECCIÓN:
+              Cambiamos product.precio por product.precioBase 
+            */}
+            <p className="price">S/ {product.precioBase.toFixed(2)}</p>
             
-            {/* Agrupamos el contador y el botón para un mejor control */}
             <div className="card-actions">
               <div className="quantity-selector">
                 <button onClick={handleDecrement} className="quantity-btn">-</button>

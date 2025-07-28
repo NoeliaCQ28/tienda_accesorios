@@ -1,3 +1,5 @@
+// src/pages/admin/EditProduct.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, storage } from '../../firebaseConfig';
@@ -5,11 +7,13 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import toast from 'react-hot-toast';
 import '../Admin.css';
+import './Customizations.css'; // Reutilizamos los mismos estilos
 
 const EditProduct = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
 
+  // Estados para los campos básicos
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [precio, setPrecio] = useState('');
@@ -19,10 +23,8 @@ const EditProduct = () => {
   const [existingImageUrl, setExistingImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // --- INICIO DE LA MODIFICACIÓN ---
-  const [customizable, setCustomizable] = useState(false);
-  const [customizationMaxLength, setCustomizationMaxLength] = useState(0);
-  // --- FIN DE LA MODIFICACIÓN ---
+  // Estado único para todas las personalizaciones
+  const [personalizaciones, setPersonalizaciones] = useState([]);
 
   useEffect(() => {
     const getProduct = async () => {
@@ -33,16 +35,22 @@ const EditProduct = () => {
         const productData = docSnap.data();
         setNombre(productData.nombre);
         setDescripcion(productData.descripcion || '');
-        setPrecio(productData.precio.toString());
+        setPrecio(productData.precioBase ? productData.precioBase.toString() : (productData.precio || '0').toString());
         setStock(productData.stock.toString());
         setTags(productData.tags ? productData.tags.join(', ') : '');
         setExistingImageUrl(productData.imagenUrl);
-        // --- INICIO DE LA MODIFICACIÓN: CARGAR DATOS EXISTENTES ---
-        setCustomizable(productData.customizable || false);
-        setCustomizationMaxLength(productData.customizationMaxLength || 0);
-        // --- FIN DE LA MODIFICACIÓN: CARGAR DATOS EXISTENTES ---
+        
+        // Cargar las personalizaciones existentes y añadirles IDs temporales
+        if (productData.personalizaciones) {
+          const loadedPersonalizaciones = productData.personalizaciones.map(p => ({
+            ...p,
+            id: Date.now() + Math.random(), 
+            opciones: p.opciones ? p.opciones.map(opt => ({ ...opt, id: Date.now() + Math.random() })) : [],
+          }));
+          setPersonalizaciones(loadedPersonalizaciones);
+        }
       } else {
-        toast.error("No se encontró el producto para editar!");
+        toast.error("No se encontró el producto para editar.");
         navigate('/admin');
       }
       setLoading(false);
@@ -50,74 +58,111 @@ const EditProduct = () => {
 
     getProduct();
   }, [productId, navigate]);
+  
+  // --- Funciones para gestionar el estado de las personalizaciones ---
+  const addPersonalizacion = () => {
+    setPersonalizaciones([
+      ...personalizaciones,
+      {
+        id: Date.now(),
+        tipo: '', 
+        label: '',
+        opciones: [{ id: Date.now(), nombre: '', precio: 0 }],
+        maxLength: 10,
+      },
+    ]);
+  };
 
+  const removePersonalizacion = (id) => {
+    setPersonalizaciones(personalizaciones.filter((p) => p.id !== id));
+  };
+
+  const handlePersonalizacionChange = (id, field, value) => {
+    const newPersonalizaciones = personalizaciones.map((p) => {
+      if (p.id === id) {
+        if (field === 'tipo' && value === 'colores') {
+          return { ...p, [field]: value, label: 'Elige una familia de colores' };
+        }
+        if (field === 'maxLength') {
+          return { ...p, [field]: parseInt(value, 10) || 0 };
+        }
+        return { ...p, [field]: value };
+      }
+      return p;
+    });
+    setPersonalizaciones(newPersonalizaciones);
+  };
+
+  const handleOptionChange = (pId, optionId, field, value) => {
+    setPersonalizaciones(personalizaciones.map(p => {
+      if (p.id === pId) {
+        const newOptions = p.opciones.map(opt => {
+          if (opt.id === optionId) {
+            const finalValue = field === 'precio' ? parseFloat(value) || 0 : value;
+            return { ...opt, [field]: finalValue };
+          }
+          return opt;
+        });
+        return { ...p, opciones: newOptions };
+      }
+      return p;
+    }));
+  };
+
+  const addOption = (pId) => {
+    setPersonalizaciones(personalizaciones.map(p => p.id === pId ? { ...p, opciones: [...p.opciones, { id: Date.now(), nombre: '', precio: 0 }] } : p));
+  };
+  
+  const removeOption = (pId, optionId) => {
+    setPersonalizaciones(personalizaciones.map(p => p.id === pId ? { ...p, opciones: p.opciones.filter(opt => opt.id !== optionId) } : p));
+  };
+  
   const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      setImageFile(e.target.files[0]);
-    }
+    if (e.target.files[0]) setImageFile(e.target.files[0]);
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // --- INICIO DE LA MODIFICACIÓN: VALIDACIÓN ---
-    let finalMaxLength = 0;
-    if (customizable) {
-        if (!customizationMaxLength || customizationMaxLength < 1) {
-            toast.error("Si el producto es personalizable, el máximo de caracteres debe ser al menos 1.");
-            return;
-        }
-        finalMaxLength = parseInt(customizationMaxLength, 10);
-    }
-    // --- FIN DE LA MODIFICACIÓN: VALIDACIÓN ---
-
     const promise = new Promise(async (resolve, reject) => {
         try {
             let imageUrl = existingImageUrl;
-
             if (imageFile) {
-                // Opcional: Borrar la imagen antigua si se sube una nueva
                 if (existingImageUrl) {
-                    const oldImageRef = ref(storage, existingImageUrl);
-                    try {
-                        await deleteObject(oldImageRef);
-                    } catch (error) {
-                        console.warn("La imagen anterior no se pudo borrar, puede que no existiera:", error);
-                    }
+                    try { await deleteObject(ref(storage, existingImageUrl)); } catch (error) { console.warn("La imagen anterior no se pudo borrar:", error); }
                 }
                 const storageRef = ref(storage, `product-images/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
                 imageUrl = await getDownloadURL(storageRef);
             }
 
-            const initialTags = tags.split(',').map(tag => tag.trim().toLowerCase());
-            const expandedTags = new Set(initialTags);
+            const tagsArray = tags.split(',').map(tag => tag.trim().toLowerCase());
 
-            initialTags.forEach(tag => {
-                const subTags = tag.split(/[\s-]+/);
-                if (subTags.length > 1) {
-                    subTags.forEach(subTag => expandedTags.add(subTag));
+            const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, maxLength }) => {
+                if (tipo === 'material') {
+                    return { tipo, label, opciones: opciones.map(({ id, ...optRest }) => optRest).filter(opt => opt.nombre) };
                 }
-            });
+                if (tipo === 'texto') {
+                    return { tipo, label, maxLength };
+                }
+                if (tipo === 'colores') {
+                    return { tipo, label: label || "Elige una familia de colores" };
+                }
+                return null;
+            }).filter(Boolean);
 
-            const productDocRef = doc(db, 'productos', productId);
-            
             const updatedData = {
                 nombre: nombre,
                 nombre_lowercase: nombre.toLowerCase(),
                 descripcion: descripcion,
-                precio: Number(precio),
+                precioBase: Number(precio),
                 stock: Number(stock),
-                tags: Array.from(expandedTags),
+                tags: tagsArray,
                 imagenUrl: imageUrl,
-                // --- INICIO DE LA MODIFICACIÓN: GUARDADO DE DATOS ---
-                customizable: customizable,
-                customizationMaxLength: finalMaxLength,
-                // --- FIN DE LA MODIFICACIÓN: GUARDADO DE DATOS ---
+                personalizaciones: finalPersonalizaciones,
             };
 
-            await updateDoc(productDocRef, updatedData);
-            
+            await updateDoc(doc(db, 'productos', productId), updatedData);
             navigate('/admin');
             resolve("¡Producto actualizado con éxito!");
         } catch (error) {
@@ -133,57 +178,66 @@ const EditProduct = () => {
       });
   };
 
-  if (loading) {
-    return <h1>Cargando producto...</h1>;
-  }
+  if (loading) return <h1>Cargando producto...</h1>;
 
   return (
     <div className="admin-container">
       <form className="product-form" onSubmit={handleSubmit}>
         <h3>Editar Producto</h3>
+        
         <div className="form-group"><label>Nombre</label><input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required /></div>
         <div className="form-group"><label>Descripción</label><textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} /></div>
-        <div className="form-group"><label>Precio (S/)</label><input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} required /></div>
+        <div className="form-group"><label>Precio Base (S/)</label><input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} required /></div>
         <div className="form-group"><label>Stock</label><input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required /></div>
-        <div className="form-group">
-          <label>Etiquetas (separadas por comas)</label>
-          <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} required />
-        </div>
-        
-        {/* --- INICIO DE LA MODIFICACIÓN: CAMPOS EN EL FORMULARIO --- */}
-        <div className="customization-fields">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={customizable}
-              onChange={(e) => setCustomizable(e.target.checked)}
-            />
-            ¿Permitir texto personalizado?
-          </label>
+        <div className="form-group"><label>Etiquetas</label><input type="text" value={tags} onChange={(e) => setTags(e.target.value)} required /></div>
+        <div className="form-group"><label>Imagen Actual</label>{existingImageUrl && <img src={existingImageUrl} alt="Imagen actual" className="image-preview"/>}</div>
+        <div className="form-group"><label htmlFor="file-upload" className="file-input-label">{imageFile ? `Nuevo: ${imageFile.name}` : "Cambiar Imagen"}</label><input id="file-upload" type="file" accept="image/*" onChange={handleImageChange} /></div>
 
-          {customizable && (
-            <div className="max-length-input">
-              <label htmlFor="maxLength">Máximo de caracteres:</label>
-              <input
-                id="maxLength"
-                type="number"
-                value={customizationMaxLength}
-                onChange={(e) => setCustomizationMaxLength(e.target.value)}
-                min="1"
-              />
+        <div className="customization-manager">
+          <h4>Gestor de Personalizaciones</h4>
+          {personalizaciones.map((p) => (
+            <div key={p.id} className="customization-block">
+              <button type="button" className="btn-remove-block" onClick={() => removePersonalizacion(p.id)}>×</button>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Tipo</label>
+                  <select value={p.tipo} onChange={(e) => handlePersonalizacionChange(p.id, 'tipo', e.target.value)}>
+                    <option value="" disabled>-- Elige un tipo --</option>
+                    <option value="material">Material (con precio por opción)</option>
+                    <option value="texto">Texto Personalizado</option>
+                    <option value="colores">Selector de Colores de Hilo</option>
+                  </select>
+                </div>
+                {p.tipo !== 'colores' && (
+                  <div className="form-group"><label>Etiqueta</label><input type="text" placeholder="Ej: Elige el material" value={p.label} onChange={(e) => handlePersonalizacionChange(p.id, 'label', e.target.value)} /></div>
+                )}
+              </div>
+              
+              {p.tipo === 'material' && (
+                <>
+                  <h5>Opciones de Material</h5>
+                  {p.opciones.map((opt) => (
+                    <div key={opt.id} className="option-row">
+                      <input type="text" placeholder="Nombre (ej: Acero - Dorado)" value={opt.nombre} onChange={(e) => handleOptionChange(p.id, opt.id, 'nombre', e.target.value)} />
+                      <input type="number" step="0.01" placeholder="Precio Final" value={opt.precio} onChange={(e) => handleOptionChange(p.id, opt.id, 'precio', e.target.value)} />
+                      {p.opciones.length > 1 && <button type="button" className="btn-remove-option" onClick={() => removeOption(p.id, opt.id)}>−</button>}
+                    </div>
+                  ))}
+                  <button type="button" className="btn-add-option" onClick={() => addOption(p.id)}>+ Añadir Opción</button>
+                </>
+              )}
+
+              {p.tipo === 'texto' && (
+                <div className="form-group">
+                    <label>Máximo de caracteres:</label>
+                    <input type="number" value={p.maxLength} onChange={(e) => handlePersonalizacionChange(p.id, 'maxLength', e.target.value)} min="1" />
+                </div>
+              )}
             </div>
-          )}
+          ))}
+          <button type="button" className="btn-add-block" onClick={addPersonalizacion}>+ Añadir Personalización</button>
         </div>
-        {/* --- FIN DE LA MODIFICACIÓN: CAMPOS EN EL FORMULARIO --- */}
 
-        <div className="form-group">
-          <label>Imagen Actual</label>
-          {existingImageUrl && <img src={existingImageUrl} alt="Imagen actual" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}/>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="file-upload" className="file-input-label">{imageFile ? `Nuevo archivo: ${imageFile.name}` : "Cambiar Imagen (opcional)"}</label>
-          <input id="file-upload" type="file" accept="image/*" onChange={handleImageChange} />
-        </div>
         <div className="form-buttons">
           <button type="submit" className="submit-btn">Guardar Cambios</button>
           <button type="button" className="btn-cancel" onClick={() => navigate('/admin')}>Cancelar</button>

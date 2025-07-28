@@ -19,7 +19,6 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const { currentUser } = useAuth();
 
-  // Función para obtener el carrito desde Firestore
   const fetchCart = async () => {
     if(!currentUser) return;
     setLoading(true);
@@ -36,7 +35,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Carga el carrito cuando el usuario inicia sesión
   useEffect(() => {
     if (currentUser) {
       fetchCart();
@@ -45,18 +43,29 @@ export const CartProvider = ({ children }) => {
     }
   }, [currentUser]);
 
+  // --- INICIO DE LA MODIFICACIÓN CLAVE ---
   const addItem = async (item, quantity) => {
     if (!currentUser) return false;
 
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // 1. Generamos un ID único para el carrito basado en el producto, el color Y el texto.
-    //    Esto asegura que cada combinación única sea un item separado en el carrito.
-    const colorIdPart = item.customization?.color?.value || 'default-color';
-    const textIdPart = item.customization?.text?.value || 'no-text';
-    const cartItemId = `${item.id}-${colorIdPart}-${textIdPart}`;
-    // --- FIN DE LA MODIFICACIÓN ---
+    // 1. Crear un identificador único para la variante del producto.
+    //    Esto convierte las personalizaciones en un string consistente.
+    //    Ej: "material:acero-dorado|texto:ab"
+    const generateVariantId = (customizations) => {
+        if (!customizations || customizations.length === 0) {
+            return 'default';
+        }
+        // Ordenamos las personalizaciones por tipo para que el orden no importe
+        return customizations
+            .sort((a, b) => a.type.localeCompare(b.type))
+            .map(c => `${c.type.toLowerCase()}:${c.value.toLowerCase().replace(/\s+/g, '-')}`)
+            .join('|');
+    };
 
-    // 2. Usamos este nuevo y más específico cartItemId como la referencia del documento.
+    const variantId = generateVariantId(item.customizations);
+    // 2. Crear el ID final para el documento en Firestore.
+    //    Ej: "producto123-material:acero-dorado|texto:ab"
+    const cartItemId = `${item.id}-${variantId}`;
+    
     const cartItemRef = doc(db, 'users', currentUser.uid, 'cart', cartItemId);
     const productRef = doc(db, 'productos', item.id);
 
@@ -74,16 +83,19 @@ export const CartProvider = ({ children }) => {
         }
 
         if (cartItemSnap.exists()) {
-            // Si el item exacto (mismo producto, mismo color, mismo texto) ya existe, solo aumenta la cantidad
+            // Si el item con la misma personalización exacta ya existe, solo aumenta la cantidad
             await updateDoc(cartItemRef, { quantity: currentQuantityInCart + quantity });
         } else {
-            // Si es un item nuevo, lo creamos con todos sus datos
+            // Si es una variante nueva, la creamos con todos sus datos
             const newItemData = { ...item, quantity };
-            delete newItemData.cartItemId; // No es necesario guardar el ID dentro del documento
+            
+            // No guardamos el ID dentro del documento, ya es el nombre del documento
+            delete newItemData.cartItemId; 
+            
             await setDoc(cartItemRef, newItemData);
         }
 
-        fetchCart(); // Recargamos el carrito desde Firestore para tener el estado más actualizado
+        fetchCart(); // Recargamos el carrito desde Firestore
         return true;
     } catch (error) {
         console.error("Error al añadir item:", error);
@@ -91,6 +103,7 @@ export const CartProvider = ({ children }) => {
         return false;
     }
   };
+  // --- FIN DE LA MODIFICACIÓN CLAVE ---
   
   const decreaseItem = async (cartItemId) => {
     if (!currentUser) return;

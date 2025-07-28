@@ -402,3 +402,24 @@
     font-weight: bold;
   }
 }
+
+/* src/pages/ProfilePage.css */
+
+/* ... (tu código CSS existente) ... */
+
+/* --- NUEVO: Estilos para los detalles de personalización en el perfil --- */
+.customizations-display-profile {
+  margin-top: 8px;
+  padding-left: 10px;
+  border-left: 2px solid #fde2ec; /* Un color rosa pálido de tu paleta */
+}
+
+.customization-detail-profile {
+  font-size: 0.85rem;
+  color: var(--color-texto-claro);
+  margin-bottom: 4px;
+}
+
+.customization-detail-profile strong {
+  color: var(--color-texto);
+}

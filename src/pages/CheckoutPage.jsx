@@ -3,26 +3,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-
-// Importamos los 3 archivos de datos
 import allDepartments from '../data/departamentos.json';
 import allProvinces from '../data/provincias.json';
 import allDistricts from '../data/distritos.json';
-
-// Importamos el componente de pago
 import PaymentSelection from '../components/PaymentSelection';
-
-// Importamos los estilos
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
   const { currentUser } = useAuth();
   const { cart, totalPrice, totalQuantity } = useCart();
   
-  // Estado para controlar el paso del checkout (1: Envío, 2: Pago)
   const [step, setStep] = useState(1);
 
-  // Estados para el formulario
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -32,14 +24,11 @@ const CheckoutPage = () => {
     referencia: '',
   });
 
-  // Estados para los menús desplegables
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [selectedDeptId, setSelectedDeptId] = useState('');
   const [selectedProvId, setSelectedProvId] = useState('');
   const [selectedDistId, setSelectedDistId] = useState('');
-
-  // Estado para la tarifa de envío
   const [shippingOption, setShippingOption] = useState(null);
 
   const shippingOptions = [
@@ -102,13 +91,14 @@ const CheckoutPage = () => {
               <input type="text" name="apellido" placeholder="Apellidos" value={formData.apellido} onChange={handleChange} required />
             </div>
             <div className="form-row">
-              <input type="text" name="dni" placeholder="DNI" value={formData.dni} onChange={handleChange} required pattern="\d{8}" title="El DNI debe tener 8 dígitos" />
+              {/* --- LÍNEA CORREGIDA --- */}
+              <input type="text" name="dni" placeholder="DNI" value={formData.dni} onChange={handleChange} required minLength="8" maxLength="8" pattern="\d*" title="El DNI debe tener 8 dígitos numéricos" />
               <input type="tel" name="telefono" placeholder="Número de Teléfono" value={formData.telefono} onChange={handleChange} required />
             </div>
 
             <h4>Dirección de Envío</h4>
-            <input type="text" name="direccion" placeholder="Dirección (ej. Jr. Progreso #299)" onChange={handleChange} required />
-            <input type="text" name="referencia" placeholder="Referencia (opcional)" onChange={handleChange} />
+            <input type="text" name="direccion" placeholder="Dirección (ej. Jr. Progreso #299)" value={formData.direccion} onChange={handleChange} required />
+            <input type="text" name="referencia" placeholder="Referencia (opcional)" value={formData.referencia} onChange={handleChange} />
             <div className="form-row">
               <select value={selectedDeptId} onChange={handleDepartmentChange} required>
                 <option value="">Departamento</option>
@@ -157,12 +147,9 @@ const CheckoutPage = () => {
             cart={cart}
             totalAmount={finalTotal}
             currentUser={currentUser}
-            // --- INICIO DE LA MODIFICACIÓN ---
-            // Pasamos los IDs de la ubicación seleccionada como props
             departmentId={selectedDeptId}
             provinceId={selectedProvId}
             districtId={selectedDistId}
-            // --- FIN DE LA MODIFICACIÓN ---
           />
         )}
       </div>
@@ -178,15 +165,14 @@ const CheckoutPage = () => {
               </div>
               <div className="summary-item-details">
                 <strong>{item.nombre}</strong>
-                {item.customization && item.customization.color && (
-                  <span className="summary-item-customization">
-                    Color: {item.customization.color.value}
-                  </span>
-                )}
-                {item.customization && item.customization.text && (
-                  <span className="summary-item-customization text">
-                    Texto: "{item.customization.text.value}"
-                  </span>
+                {item.customizations && item.customizations.length > 0 && (
+                  <div className="summary-customizations-list">
+                    {item.customizations.map((cust, index) => (
+                      <span key={index} className="summary-item-customization">
+                        <strong>{cust.type}:</strong> {cust.value}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
               <div className="summary-item-price">

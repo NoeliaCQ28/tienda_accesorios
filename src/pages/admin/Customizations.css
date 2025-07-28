@@ -1,0 +1,215 @@
+/* src/pages/admin/Customizations.css */
+
+.customization-manager {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  background-color: #f9fafb;
+}
+
+html[data-theme='dark'] .customization-manager {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.customization-manager h4 {
+  margin: 0 0 1.5rem 0;
+  font-family: var(--font-titulos);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.customization-block {
+  background-color: var(--color-superficie);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+html[data-theme='dark'] .customization-block {
+  border-color: #444;
+}
+
+.customization-block h5 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-titulos);
+}
+
+.btn-remove-block {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-remove-block:hover {
+  background: #fecaca;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.option-row input:first-child {
+  flex-grow: 1; /* El nombre de la opción ocupa más espacio */
+}
+
+.btn-remove-option {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-add-option, .btn-add-block {
+  background: none;
+  border: 1px dashed #a1a1aa;
+  color: #71717a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 5px;
+  display: inline-block;
+}
+.btn-add-option:hover, .btn-add-block:hover {
+  background-color: #f4f4f5;
+  border-color: #71717a;
+}
+
+html[data-theme='dark'] .btn-add-option, 
+html[data-theme='dark'] .btn-add-block {
+  border-color: #555;
+  color: #ccc;
+}
+html[data-theme='dark'] .btn-add-option:hover, 
+html[data-theme='dark'] .btn-add-block:hover {
+  background-color: #3a3b3c;
+  border-color: #888;
+}/* src/pages/admin/Customizations.css */
+
+.customization-manager {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  background-color: #f9fafb;
+}
+
+html[data-theme='dark'] .customization-manager {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.customization-manager h4 {
+  margin: 0 0 1.5rem 0;
+  font-family: var(--font-titulos);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.customization-block {
+  background-color: var(--color-superficie);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+html[data-theme='dark'] .customization-block {
+  border-color: #444;
+}
+
+.customization-block h5 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-titulos);
+}
+
+.btn-remove-block {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-remove-block:hover {
+  background: #fecaca;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.option-row input:first-child {
+  flex-grow: 1; /* El nombre de la opción ocupa más espacio */
+}
+
+.btn-remove-option {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-add-option, .btn-add-block {
+  background: none;
+  border: 1px dashed #a1a1aa;
+  color: #71717a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 5px;
+  display: inline-block;
+}
+.btn-add-option:hover, .btn-add-block:hover {
+  background-color: #f4f4f5;
+  border-color: #71717a;
+}
+
+html[data-theme='dark'] .btn-add-option, 
+html[data-theme='dark'] .btn-add-block {
+  border-color: #555;
+  color: #ccc;
+}
+html[data-theme='dark'] .btn-add-option:hover, 
+html[data-theme='dark'] .btn-add-block:hover {
+  background-color: #3a3b3c;
+  border-color: #888;
+}

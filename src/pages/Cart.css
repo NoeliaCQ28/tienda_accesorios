@@ -69,4 +69,26 @@
   font-style: italic;
   margin-top: 0.25rem; /* Espacio extra si hay color y texto */
 }
+
+/* src/pages/Cart.css */
+
+/* ... (tu código CSS existente) ... */
+
+/* --- NUEVO: Estilos para la lista de personalizaciones en el carrito --- */
+.cart-customizations-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 12px 0;
+  font-size: 0.9rem;
+  color: var(--color-texto-claro);
+}
+
+.cart-customizations-list li {
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+.cart-customizations-list strong {
+  color: var(--color-texto);
+}
 /* --- FIN DE LA MODIFICACIÓN --- */

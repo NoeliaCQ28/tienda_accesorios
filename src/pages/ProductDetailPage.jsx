@@ -1,6 +1,6 @@
 // src/pages/ProductDetailPage.jsx
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './ProductDetailPage.css';
 import ProductColorSelector from '../components/ProductColorSelector';
+import ProductOptionSelector from '../components/ProductOptionSelector';
 
 const ProductDetailPage = () => {
     const { productId } = useParams();
@@ -20,14 +21,12 @@ const ProductDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // 1. El estado `selectedColor` ahora puede ser:
-    //    null: Aún no se ha decidido nada.
-    //    'original': El cliente ha confirmado que quiere los colores por defecto.
-    //    {objeto}: El cliente ha elegido un color específico.
+    // --- ESTADOS PARA CADA TIPO DE PERSONALIZACIÓN ---
     const [selectedColor, setSelectedColor] = useState(null);
-    const [customText, setCustomText] = useState("");
-    // --- FIN DE LA MODIFICACIÓN ---
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
+    // --- MODIFICADO: Estado para el texto ahora es un objeto ---
+    const [customizationsText, setCustomizationsText] = useState({});
+    const [totalPrice, setTotalPrice] = useState(0);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -36,7 +35,9 @@ const ProductDetailPage = () => {
                 const productRef = doc(db, 'productos', productId);
                 const docSnap = await getDoc(productRef);
                 if (docSnap.exists()) {
-                    setProduct({ id: docSnap.id, ...docSnap.data() });
+                    const productData = { id: docSnap.id, ...docSnap.data() };
+                    setProduct(productData);
+                    setTotalPrice(productData.precioBase || 0);
                 } else {
                     toast.error("Producto no encontrado.");
                 }
@@ -49,34 +50,80 @@ const ProductDetailPage = () => {
         fetchProduct();
     }, [productId]);
 
+    useEffect(() => {
+        if (!product) return;
+        const newTotal = selectedMaterial?.precio ?? product.precioBase;
+        setTotalPrice(newTotal || 0);
+    }, [product, selectedMaterial]);
+
+    // --- Buscamos TODAS las personalizaciones por tipo ---
+    const materialCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'material') || [];
+    const textCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'texto') || [];
+    const colorCustomization = product?.personalizaciones?.find(p => p.tipo === 'colores');
+
+    const handleMaterialSelect = (personalizacionLabel, option) => {
+        // Lógica de selección/deselección para un grupo de materiales
+        setSelectedMaterial(prev => {
+            // Deseleccionamos si volvemos a hacer clic en la misma opción
+            if (prev && prev.nombre === option.nombre) {
+                return null;
+            }
+            return option;
+        });
+    };
+    
+    // --- NUEVO: Handler para manejar múltiples campos de texto ---
+    const handleTextChange = (label, text) => {
+        setCustomizationsText(prev => ({
+            ...prev,
+            [label]: text,
+        }));
+    };
+
     const handleAddToCart = () => {
         if (!product) return;
         
-        const isBracelet = product.tags && product.tags.includes('pulseras');
-        if (isBracelet && selectedColor === null) {
-            toast.error("Por favor, elige una opción de color para continuar.");
+        // Validamos CADA grupo de material
+        for (const custom of materialCustomizations) {
+            if (!selectedMaterial) { // Asumimos que solo hay un grupo de material por ahora
+                toast.error(`Por favor, elige una opción para "${custom.label}".`);
+                return;
+            }
+        }
+        
+        if (colorCustomization && selectedColor === null) {
+            toast.error(`Por favor, elige una opción de: ${colorCustomization.label}`);
             return;
         }
 
         if (currentUser) {
-            const colorCustomization = selectedColor && selectedColor !== 'original' ? {
-                type: 'Color',
-                value: selectedColor.name,
-                color: selectedColor.color,
-            } : null;
+            const finalCustomizations = [];
 
-            const textCustomization = product.customizable && customText.trim() ? {
-                type: 'Texto',
-                value: customText.trim(),
-            } : null;
+            if (selectedMaterial) {
+                // Buscamos a qué grupo pertenece el material seleccionado
+                const parentCustomization = materialCustomizations.find(p => p.opciones.some(o => o.nombre === selectedMaterial.nombre));
+                if (parentCustomization) {
+                    finalCustomizations.push({ type: parentCustomization.label, value: selectedMaterial.nombre });
+                }
+            }
+            
+            // Guardar textos personalizados
+            Object.entries(customizationsText).forEach(([label, text]) => {
+                if (text && text.trim()) {
+                    finalCustomizations.push({ type: label, value: text.trim() });
+                }
+            });
+
+            if (colorCustomization && selectedColor) {
+                const colorValue = selectedColor === 'original' ? 'Color Original (de la foto)' : selectedColor.name;
+                finalCustomizations.push({ type: colorCustomization.label, value: colorValue });
+            }
 
             const productToAdd = {
               ...product,
+              precio: totalPrice,
               quantity,
-              customization: {
-                color: colorCustomization,
-                text: textCustomization,
-              }
+              customizations: finalCustomizations, 
             };
 
             addItem(productToAdd, quantity);
@@ -90,53 +137,55 @@ const ProductDetailPage = () => {
     if (loading) return <div className="detail-loading">Cargando producto...</div>;
     if (!product) return <div className="detail-loading">Producto no encontrado.</div>;
     
-    const isBracelet = product.tags && product.tags.includes('pulseras');
-    // 2. Lógica corregida: el botón SÓLO se deshabilita si es una pulsera y no se ha tomado ninguna decisión (selectedColor es null).
-    const isAddToCartDisabled = isBracelet && selectedColor === null;
+    const isAddToCartDisabled = (materialCustomizations.length > 0 && !selectedMaterial) || (colorCustomization && selectedColor === null);
 
     return (
         <div className="product-detail-page">
             <div className="product-detail-layout">
                 <div className="product-images">
                     <img src={product.imagenUrl} alt={product.nombre} className="main-image" />
-                    {selectedColor && typeof selectedColor === 'object' && (
-                         <div className="color-preview-container">
-                            <p className="color-preview-text">Color:</p>
-                            <div 
-                                className="color-preview-dot"
-                                style={{ background: selectedColor.color, border: selectedColor.color === '#FFFFFF' ? '1px solid #ddd' : 'none' }}
-                            />
-                            <span>{selectedColor.name}</span>
-                        </div>
-                    )}
                 </div>
 
                 <div className="product-info-section">
                     <h1 className="product-title">{product.nombre}</h1>
-                    <p className="product-detail-price">S/ {product.precio.toFixed(2)}</p>
+                    <p className="product-detail-price">S/ {totalPrice.toFixed(2)}</p>
                     <p className="product-detail-description">{product.descripcion}</p>
                     
                     <div className="customization-container">
-                        {isBracelet && (
-                            <ProductColorSelector product={product} onColorChange={setSelectedColor} />
-                        )}
+                        {/* --- RENDERIZADO CORREGIDO EN ORDEN --- */}
 
-                        {product.customizable && (
-                            <div className="text-customization-container">
-                                <label htmlFor="customText">Añade tu texto (opcional):</label>
+                        {/* 1. Selectores de Material */}
+                        {materialCustomizations.map(custom => (
+                            <ProductOptionSelector
+                                key={custom.label}
+                                customization={custom}
+                                selectedOption={selectedMaterial}
+                                onOptionSelect={(option) => handleMaterialSelect(custom.label, option)}
+                            />
+                        ))}
+                        
+                        {/* 2. Campos de Texto */}
+                        {textCustomizations.map(custom => (
+                            <div key={custom.label} className="text-customization-container">
+                                <label htmlFor={custom.label}>{custom.label}:</label>
                                 <input
                                     type="text"
-                                    id="customText"
-                                    placeholder="Ej: J❤️L"
-                                    value={customText}
-                                    onChange={(e) => setCustomText(e.target.value)}
-                                    maxLength={product.customizationMaxLength}
+                                    id={custom.label}
+                                    placeholder={`Máx. ${custom.maxLength} caracteres`}
+                                    value={customizationsText[custom.label] || ''}
+                                    onChange={(e) => handleTextChange(custom.label, e.target.value)}
+                                    maxLength={custom.maxLength}
                                     className="custom-text-input"
                                 />
                                 <small className="char-counter">
-                                    {customText.length} / {product.customizationMaxLength} caracteres
+                                    {(customizationsText[custom.label] || '').length} / {custom.maxLength}
                                 </small>
                             </div>
+                        ))}
+
+                        {/* 3. Selector de Color */}
+                        {colorCustomization && (
+                            <ProductColorSelector product={product} onColorChange={setSelectedColor} />
                         )}
                     </div>
                     
@@ -151,14 +200,13 @@ const ProductDetailPage = () => {
                             onClick={handleAddToCart}
                             disabled={isAddToCartDisabled}
                         >
-                            {/* 3. El texto del botón ahora es más genérico cuando está deshabilitado. */}
-                            {isAddToCartDisabled ? 'Elige una opción' : 'Añadir al Carrito'}
+                            {isAddToCartDisabled ? 'Elige tus opciones' : 'Añadir al Carrito'}
                         </button>
                     </div>
 
                     <div className="product-meta">
                         <span><strong>Stock:</strong> {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}</span>
-                        <span><strong>Categorías:</strong> {product.tags.join(', ')}</span>
+                        <span><strong>Categorías:</strong> {product.tags ? product.tags.join(', ') : ''}</span>
                     </div>
                 </div>
             </div>

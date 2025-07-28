@@ -1,12 +1,12 @@
 // src/components/Boleta.jsx
 
 import React from 'react';
-import './Boleta.css'; // Crearemos este archivo de estilos a continuación
-import logo from '../assets/logo.png'; // Asegúrate de que tu logo esté en src/assets/logo.png
+import './Boleta.css';
+import logo from '../assets/logo.png'; // Asegúrate de que la ruta a tu logo sea correcta
 
 export const Boleta = React.forwardRef(({ order }, ref) => {
   if (!order) {
-    return null; // No renderizar nada si no hay una orden para imprimir
+    return null;
   }
 
   return (
@@ -25,7 +25,7 @@ export const Boleta = React.forwardRef(({ order }, ref) => {
           <h3>Cliente</h3>
           <p><strong>Nombre:</strong> {order.customer.nombre} {order.customer.apellido}</p>
           <p><strong>Dirección:</strong> {order.customer.direccion}</p>
-          <p><strong>Ubicación:</strong> {order.customer.distrito} - {order.customer.provincia} - {order.customer.departamento}</p>
+          <p><strong>Ubicación:</strong> {order.customer.distrito} - {order.customer.provincia} - {order.customer.departamento || ''}</p>
           <p><strong>Teléfono:</strong> {order.customer.telefono}</p>
         </div>
         <div className="order-meta-info">
@@ -51,17 +51,19 @@ export const Boleta = React.forwardRef(({ order }, ref) => {
               <tr key={index}>
                 <td>{item.quantity}</td>
                 <td>
-                  {item.nombre}
-                  {item.customization?.color && (
-                    <div className="item-customization-print">
-                      <strong>Color:</strong> {item.customization.color.value}
+                  <strong>{item.nombre}</strong>
+                  {/* --- INICIO DE LA MODIFICACIÓN --- */}
+                  {/* Verificamos si hay personalizaciones y las mostramos como una lista */}
+                  {item.customizations && item.customizations.length > 0 && (
+                    <div className="item-customizations-print">
+                      {item.customizations.map((cust, custIndex) => (
+                        <div key={custIndex} className="customization-line">
+                          <span>{cust.type}:</span> {cust.value}
+                        </div>
+                      ))}
                     </div>
                   )}
-                  {item.customization?.text && (
-                    <div className="item-customization-print text">
-                      <strong>Texto:</strong> "{item.customization.text.value}"
-                    </div>
-                  )}
+                  {/* --- FIN DE LA MODIFICACIÓN --- */}
                 </td>
                 <td>S/ {(item.precio * item.quantity).toFixed(2)}</td>
               </tr>

@@ -1,0 +1,61 @@
+/* src/components/ProductOptionSelector.css */
+
+.option-selector-container {
+  margin-top: 1.5rem;
+}
+
+.customization-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--color-texto);
+  font-size: 1rem;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 2px solid var(--color-borde, #e5e7eb);
+  border-radius: var(--radio-borde, 12px);
+  background-color: var(--color-superficie, #fff);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  font-family: var(--font-cuerpo);
+}
+
+.option-btn:hover {
+  border-color: var(--color-primario-oscuro, #c2185b);
+  transform: translateY(-2px);
+}
+
+.option-btn.selected {
+  border-color: var(--color-primario, #e91e63);
+  background-color: var(--color-secundario, #fdf2f7);
+  box-shadow: 0 0 0 2px var(--color-primario, #e91e63);
+}
+
+html[data-theme='dark'] .option-btn.selected {
+  background-color: #3c2f3d;
+}
+
+.option-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-texto);
+}
+
+.option-price {
+  font-size: 0.85rem;
+  color: var(--color-texto-claro);
+  margin-top: 4px;
+}

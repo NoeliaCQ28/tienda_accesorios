@@ -138,16 +138,14 @@ const ProfilePage = () => {
                               <span>{item.nombre}</span>
                               <span className="product-qty">Cantidad: {item.quantity}</span>
                               
-                              {/* Mostramos el color si existe */}
-                              {item.customization && item.customization.color && (
-                                <div className="customization-detail-profile">
-                                  <strong>Color:</strong> {item.customization.color.value}
-                                </div>
-                              )}
-                              {/* Mostramos el texto si existe */}
-                              {item.customization && item.customization.text && (
-                                <div className="customization-detail-profile text">
-                                  <strong>Texto:</strong> "{item.customization.text.value}"
+                              {/* Iteramos sobre el array de personalizaciones */}
+                              {item.customizations && item.customizations.length > 0 && (
+                                <div className="customizations-display-profile">
+                                  {item.customizations.map((cust, custIndex) => (
+                                    <div key={custIndex} className="customization-detail-profile">
+                                      <strong>{cust.type}:</strong> {cust.value}
+                                    </div>
+                                  ))}
                                 </div>
                               )}
 

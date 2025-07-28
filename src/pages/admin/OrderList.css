@@ -531,3 +531,27 @@
 .thermal-printer-status:hover .printer-status-indicator::before {
   left: 100%;
 }
+
+/* src/pages/admin/OrderList.css */
+
+/* ... (tu código CSS existente) ... */
+
+/* --- NUEVO: Estilos para el detalle de personalizaciones en el panel --- */
+.customizations-display {
+  margin-top: 8px;
+  padding-left: 10px;
+  border-left: 2px solid #fde2ec; /* Un color rosa pálido de tu paleta */
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Espacio entre cada línea de personalización */
+}
+
+.customization-detail {
+  font-size: 0.85rem;
+  color: #555; /* color-texto-claro */
+}
+
+.customization-detail strong {
+  color: #2c2c2c; /* color-texto */
+  font-weight: 600;
+}
