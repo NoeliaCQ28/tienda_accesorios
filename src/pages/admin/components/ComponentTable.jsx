@@ -1,11 +1,14 @@
 // src/pages/admin/components/ComponentTable.jsx
 
 import React, { useState } from 'react';
+import ComponentDetailModal from './ComponentDetailModal';
 import './ComponentTable.css';
 
 const ComponentTable = ({ components, onEdit, onDelete }) => {
   const [selectedComponents, setSelectedComponents] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedComponentForDetail, setSelectedComponentForDetail] = useState(null);
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -44,6 +47,22 @@ const ComponentTable = ({ components, onEdit, onDelete }) => {
     if (stock === 0) return 'Agotado';
     if (stock <= minStock) return 'Stock bajo';
     return 'En stock';
+  };
+
+  // Funciones para el modal de detalles
+  const handleViewDetails = (component) => {
+    setSelectedComponentForDetail(component);
+    setShowDetailModal(true);
+  };
+
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedComponentForDetail(null);
+  };
+
+  const handleEditFromModal = (component) => {
+    closeDetailModal();
+    onEdit(component);
   };
 
   return (
@@ -187,7 +206,8 @@ const ComponentTable = ({ components, onEdit, onDelete }) => {
                     </button>
                     <button
                       className="action-btn view-btn"
-                      title="Ver productos que usan este componente"
+                      onClick={() => handleViewDetails(component)}
+                      title="Ver detalles del componente"
                     >
                       👁️
                     </button>
@@ -203,6 +223,15 @@ const ComponentTable = ({ components, onEdit, onDelete }) => {
         <div className="table-empty">
           <p>No hay componentes para mostrar</p>
         </div>
+      )}
+
+      {/* Modal de detalles */}
+      {showDetailModal && (
+        <ComponentDetailModal
+          component={selectedComponentForDetail}
+          onClose={closeDetailModal}
+          onEdit={handleEditFromModal}
+        />
       )}
     </div>
   );

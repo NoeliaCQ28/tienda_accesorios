@@ -8,10 +8,12 @@ import './ComponentSelector.css';
 const ComponentSelector = ({ 
   selectedComponents, 
   componentPrices, 
+  componentQuantities = {},
   allowMultiple, 
   filterByType,
   onComponentToggle,
   onPriceChange,
+  onQuantityChange,
   onConfigChange
 }) => {
   const [components, setComponents] = useState([]);
@@ -65,6 +67,77 @@ const ComponentSelector = ({
 
   const getComponentPrice = (component) => {
     return componentPrices[component.id] || component.calculatedPrice || component.costPrice || 0;
+  };
+
+  // Funciones para manejar cantidades
+  const getComponentQuantity = (component) => {
+    return componentQuantities[component.id] || component.cantidadMinima || 1;
+  };
+
+  const handleQuantityChange = (componentId, value) => {
+    const component = components.find(c => c.id === componentId);
+    if (!component) return;
+
+    // Asegurar que la cantidad respeta los mínimos e incrementos
+    const min = component.cantidadMinima || 1;
+    const increment = component.incremento || 1;
+    
+    // Normalizar al incremento más cercano
+    const normalized = Math.round(value / increment) * increment;
+    const finalValue = Math.max(min, normalized);
+    
+    if (onQuantityChange) {
+      onQuantityChange(componentId, finalValue);
+    }
+  };
+
+  const incrementQuantity = (componentId) => {
+    const component = components.find(c => c.id === componentId);
+    const current = getComponentQuantity(component);
+    const increment = component.incremento || 1;
+    handleQuantityChange(componentId, current + increment);
+  };
+
+  const decrementQuantity = (componentId) => {
+    const component = components.find(c => c.id === componentId);
+    const current = getComponentQuantity(component);
+    const increment = component.incremento || 1;
+    const min = component.cantidadMinima || 1;
+    const newValue = Math.max(min, current - increment);
+    handleQuantityChange(componentId, newValue);
+  };
+
+  const getUnitDisplay = (unit) => {
+    if (unit === 'gramo') return 'g';
+    if (unit === 'metro') return 'm';
+    return 'und';
+  };
+
+  // Nuevas funciones para manejo de unidades duales
+  const getUsageUnitDisplay = (component) => {
+    const usageUnit = component.unidadDeUso || component.unidadMedida || 'unidad';
+    return getUnitDisplay(usageUnit);
+  };
+
+  const getInventoryUnitDisplay = (component) => {
+    return getUnitDisplay(component.unidadMedida || 'unidad');
+  };
+
+  // Calcular cantidad en unidades de inventario basado en cantidad de uso
+  const calculateInventoryQuantity = (component, usageQuantity) => {
+    if (!component.unidadDeUso || component.unidadMedida === component.unidadDeUso) {
+      return usageQuantity;
+    }
+    
+    const equivalence = component.equivalenciaUso || 1;
+    return usageQuantity / equivalence;
+  };
+
+  // Calcular el costo total considerando el sistema dual
+  const calculateTotalCost = (component, usageQuantity) => {
+    const inventoryQuantity = calculateInventoryQuantity(component, usageQuantity);
+    const pricePerInventoryUnit = getComponentPrice(component);
+    return inventoryQuantity * pricePerInventoryUnit;
   };
 
   if (loading) {
@@ -185,21 +258,139 @@ const ComponentSelector = ({
                   </div>
 
                   {isSelected && (
-                    <div className="price-config">
-                      <label>Precio de venta (S/):</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={currentPrice}
-                        onChange={(e) => onPriceChange(component.id, parseFloat(e.target.value) || 0)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="price-input"
-                      />
-                      {component.costPrice && (
-                        <small className="cost-hint">
-                          Costo: S/ {component.costPrice.toFixed(2)}
-                        </small>
+                    <div className="component-config">
+                      {/* Selector de cantidad - usando unidades de uso */}
+                      {(component.unidadDeUso || component.unidadMedida) !== 'unidad' && (
+                        <div className="quantity-config">
+                          <div className="quantity-label">
+                            <label>Cantidad ({getUsageUnitDisplay(component)}):</label>
+                            {component.unidadDeUso && component.unidadMedida !== component.unidadDeUso && (
+                              <small className="inventory-info">
+                                Consume: {calculateInventoryQuantity(component, getComponentQuantity(component)).toFixed(2)} {getInventoryUnitDisplay(component)} del inventario
+                              </small>
+                            )}
+                          </div>
+                          <div className="quantity-controls">
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                decrementQuantity(component.id);
+                              }}
+                              className="quantity-btn minus"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              value={getComponentQuantity(component)}
+                              onChange={(e) => handleQuantityChange(component.id, parseFloat(e.target.value) || component.cantidadMinima)}
+                              onClick={(e) => e.stopPropagation()}
+                              step={component.incremento || 1}
+                              min={component.cantidadMinima || 1}
+                              max={component.stock}
+                              className="quantity-input"
+                            />
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                incrementQuantity(component.id);
+                              }}
+                              className="quantity-btn plus"
+                              disabled={getComponentQuantity(component) >= component.stock}
+                            >
+                              +
+                            </button>
+                          </div>
+                          <small className="quantity-hint">
+                            Min: {component.cantidadMinima} | Paso: {component.incremento} | Max: {component.stock}
+                          </small>
+                        </div>
+                      )}
+
+                      {/* Configuración de precio */}
+                      <div className="price-config">
+                        <label>Precio de venta (S/):</label>
+                        <div className="price-input-group">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={currentPrice}
+                            onChange={(e) => onPriceChange(component.id, parseFloat(e.target.value) || 0)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="price-input"
+                          />
+                          <span className="price-unit">
+                            por {getInventoryUnitDisplay(component)}
+                            {component.unidadDeUso && component.unidadMedida !== component.unidadDeUso && (
+                              <small> (inventario)</small>
+                            )}
+                          </span>
+                        </div>
+                        
+                        {/* Mostrar precio total usando el cálculo dual */}
+                        {(component.unidadDeUso || component.unidadMedida) !== 'unidad' && (
+                          <div className="pricing-breakdown">
+                            <div className="usage-cost">
+                              Costo por uso: S/ {(calculateTotalCost(component, getComponentQuantity(component))).toFixed(2)}
+                              <small>({getComponentQuantity(component)} {getUsageUnitDisplay(component)})</small>
+                            </div>
+                            {component.unidadDeUso && component.unidadMedida !== component.unidadDeUso && (
+                              <div className="inventory-cost">
+                                <small>
+                                  Equivale a {calculateInventoryQuantity(component, getComponentQuantity(component)).toFixed(2)} {getInventoryUnitDisplay(component)} × S/ {currentPrice.toFixed(2)}
+                                </small>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Botón para usar precio sugerido */}
+                        {component.calculatedPrice && component.calculatedPrice !== currentPrice && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onPriceChange(component.id, component.calculatedPrice);
+                            }}
+                            className="use-suggested-btn"
+                          >
+                            Usar sugerido (S/ {component.calculatedPrice.toFixed(2)})
+                          </button>
+                        )}
+                        
+                        {component.costPrice && (
+                          <small className="cost-hint">
+                            Costo: S/ {component.costPrice.toFixed(2)}
+                          </small>
+                        )}
+                      </div>
+
+                      {/* Vista especial para pastillas */}
+                      {component.type === 'pastilla' && (
+                        <div className="pastilla-preview">
+                          <div 
+                            className="pastilla-mini"
+                            style={{
+                              backgroundColor: component.colorFondo || '#CCCCCC'
+                            }}
+                          >
+                            <div 
+                              className="pastilla-mini-interior"
+                              style={{
+                                backgroundColor: component.colorInterior || '#FFFFFF'
+                              }}
+                            ></div>
+                            {component.luminiscente && (
+                              <div className="pastilla-mini-glow"></div>
+                            )}
+                          </div>
+                          {component.luminiscente && (
+                            <span className="luminescent-badge">✨ Luminiscente</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
