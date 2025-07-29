@@ -1,0 +1,300 @@
+/* src/pages/admin/ComponentManager.css */
+
+.component-manager {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Header */
+.component-header {
+  margin-bottom: 25px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 20px 0;
+}
+
+.header-content h3 {
+  margin: 0;
+  color: #333;
+  font-size: 32px;
+  font-weight: 600;
+  flex: 1;
+}
+
+/* Barra de acciones */
+.component-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 18px 24px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  gap: 20px;
+}
+
+.actions-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+/* Modos de vista */
+.view-modes {
+  display: flex;
+  gap: 8px;
+  background: white;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.view-btn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.view-btn:hover {
+  background: #f1f3f5;
+  color: #333;
+}
+
+.view-btn.active {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* Filtros y búsqueda */
+.actions-right {
+  display: flex;
+  align-items: center;
+}
+
+.search-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input,
+.filter-select,
+.sort-select {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.search-input {
+  width: 220px;
+  min-width: 200px;
+}
+
+.search-input:focus,
+.filter-select:focus,
+.sort-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-select,
+.sort-select {
+  width: 140px;
+  min-width: 130px;
+}
+
+/* Contenido */
+.component-content {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-state h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .component-actions {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .actions-left,
+  .actions-right {
+    justify-content: center;
+  }
+
+  .search-filters {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .component-manager {
+    padding: 15px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .search-input {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .filter-select,
+  .sort-select {
+    width: 120px;
+  }
+
+  .view-modes {
+    justify-content: center;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.component-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modo oscuro (si lo implementas) */
+@media (prefers-color-scheme: dark) {
+  .component-manager {
+    color: #e9ecef;
+  }
+
+  .component-actions {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .search-input,
+  .filter-select,
+  .sort-select {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e9ecef;
+  }
+
+  .view-modes {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .view-btn {
+    color: #a0aec0;
+  }
+
+  .view-btn:hover {
+    background: #4a5568;
+    color: #e9ecef;
+  }
+
+  .component-content {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .empty-state {
+    color: #a0aec0;
+  }
+
+  .empty-state h4 {
+    color: #e9ecef;
+  }
+}

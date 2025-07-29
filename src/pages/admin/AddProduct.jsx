@@ -6,11 +6,14 @@ import { db, storage } from '../../firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import toast from 'react-hot-toast';
+import ComponentSelector from '../../components/ComponentSelector';
+import { useComponentUsage } from '../../hooks/useComponentUsage';
 import '../Admin.css';
 import './Customizations.css';
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const { incrementComponentUsage } = useComponentUsage();
   
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -31,6 +34,11 @@ const AddProduct = () => {
         opciones: [{ id: Date.now(), nombre: '', precio: 0 }], // Para 'material'
         opcionesFijas: '', // Para 'selector' (se guardan como string separado por comas)
         maxLength: 20, // Para 'texto'
+        // Nuevos campos para componentes
+        selectedComponents: [], // Array de IDs de componentes seleccionados
+        componentPrices: {}, // Objeto {componentId: precio} para precios personalizados
+        allowMultiple: false, // Si permite seleccionar múltiples componentes
+        filterByType: '', // Filtro por tipo de componente
       },
     ]);
   };
@@ -48,6 +56,10 @@ const AddProduct = () => {
           updatedP.opciones = [{ id: Date.now(), nombre: '', precio: 0 }];
           updatedP.opcionesFijas = '';
           updatedP.maxLength = 20;
+          updatedP.selectedComponents = [];
+          updatedP.componentPrices = {};
+          updatedP.allowMultiple = false;
+          updatedP.filterByType = '';
         }
         return updatedP;
       }
@@ -80,6 +92,34 @@ const AddProduct = () => {
     setPersonalizaciones(personalizaciones.map(p => p.id === pId ? { ...p, opciones: p.opciones.filter(opt => opt.id !== optionId) } : p));
   };
 
+  // Nuevas funciones para manejar el ComponentSelector
+  const handleComponentToggle = (pId, selectedComponents) => {
+    setPersonalizaciones(personalizaciones.map(p => 
+      p.id === pId ? { ...p, selectedComponents } : p
+    ));
+  };
+
+  const handleComponentPriceChange = (pId, componentId, price) => {
+    setPersonalizaciones(personalizaciones.map(p => {
+      if (p.id === pId) {
+        return {
+          ...p,
+          componentPrices: {
+            ...p.componentPrices,
+            [componentId]: price
+          }
+        };
+      }
+      return p;
+    }));
+  };
+
+  const handleComponentConfigChange = (pId, field, value) => {
+    setPersonalizaciones(personalizaciones.map(p => 
+      p.id === pId ? { ...p, [field]: value } : p
+    ));
+  };
+
   const handleImageChange = (e) => {
     if (e.target.files[0]) setImageFile(e.target.files[0]);
   };
@@ -99,9 +139,19 @@ const AddProduct = () => {
         const tagsArray = tags.split(',').map(tag => tag.trim().toLowerCase());
 
         // --- MODIFICADO: Preparamos los datos para CADA tipo de personalización ---
-        const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, opcionesFijas, maxLength }) => {
+        const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, opcionesFijas, maxLength, selectedComponents, componentPrices, allowMultiple, filterByType }) => {
           if (tipo === 'material') {
             return { tipo, label, opciones: opciones.map(({ id, ...optRest }) => optRest).filter(opt => opt.nombre) };
+          }
+          if (tipo === 'componentes') {
+            return { 
+              tipo, 
+              label, 
+              selectedComponents: selectedComponents || [],
+              componentPrices: componentPrices || {},
+              allowMultiple: allowMultiple || false,
+              filterByType: filterByType || ''
+            };
           }
           if (tipo === 'texto') {
             return { tipo, label, maxLength: Number(maxLength) };
@@ -110,6 +160,9 @@ const AddProduct = () => {
             // Convertimos el string "A, B, C" en un array ["A", "B", "C"]
             const opcionesArray = opcionesFijas.split(',').map(opt => opt.trim()).filter(Boolean);
             return { tipo, label, opciones: opcionesArray };
+          }
+          if (tipo === 'colores') {
+            return { tipo, label };
           }
           return null;
         }).filter(Boolean);
@@ -126,6 +179,16 @@ const AddProduct = () => {
         };
         
         await addDoc(collection(db, 'productos'), newProductData);
+
+        // Incrementar contadores de uso de componentes seleccionados
+        const allSelectedComponents = finalPersonalizaciones
+          .filter(p => p.tipo === 'componentes')
+          .flatMap(p => p.selectedComponents || []);
+        
+        await Promise.all(
+          allSelectedComponents.map(componentId => incrementComponentUsage(componentId))
+        );
+
         navigate('/admin');
         resolve("¡Producto añadido con éxito!");
 
@@ -166,6 +229,7 @@ const AddProduct = () => {
                   <select value={p.tipo} onChange={(e) => handlePersonalizacionChange(p.id, 'tipo', e.target.value)}>
                     <option value="" disabled>-- Elige un tipo --</option>
                     <option value="material">Material (con precio por opción)</option>
+                    <option value="componentes">Selector de Componentes</option>
                     <option value="texto">Texto Personalizado</option>
                     <option value="selector">Selector Fijo (ej. Letras)</option>
                     <option value="colores">Selector de Colores de Hilo</option>
@@ -189,6 +253,18 @@ const AddProduct = () => {
                   ))}
                   <button type="button" className="btn-add-option" onClick={() => addOption(p.id)}>+ Añadir Opción</button>
                 </>
+              )}
+
+              {p.tipo === 'componentes' && (
+                <ComponentSelector
+                  selectedComponents={p.selectedComponents || []}
+                  componentPrices={p.componentPrices || {}}
+                  allowMultiple={p.allowMultiple || false}
+                  filterByType={p.filterByType || ''}
+                  onComponentToggle={(selectedComponents) => handleComponentToggle(p.id, selectedComponents)}
+                  onPriceChange={(componentId, price) => handleComponentPriceChange(p.id, componentId, price)}
+                  onConfigChange={(field, value) => handleComponentConfigChange(p.id, field, value)}
+                />
               )}
 
               {p.tipo === 'texto' && (

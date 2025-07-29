@@ -7,6 +7,7 @@ import OrderList from './OrderList';
 import Dashboard from './Dashboard';
 import AddProduct from './AddProduct';
 import EditProduct from './EditProduct';
+import ComponentManager from './ComponentManager';
 import './AdminPage.css';
 
 const AdminPage = () => {
@@ -34,6 +35,12 @@ const AdminPage = () => {
           >
             Pedidos
           </NavLink>
+          <NavLink 
+            to="/admin/components" 
+            className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}
+          >
+            Componentes
+          </NavLink>
         </nav>
       </div>
       
@@ -42,6 +49,7 @@ const AdminPage = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="products" element={<ProductList />} />
           <Route path="orders" element={<OrderList />} />
+          <Route path="components" element={<ComponentManager />} />
           <Route path="add" element={<AddProduct />} />
           <Route path="edit/:productId" element={<EditProduct />} />
         </Routes>
