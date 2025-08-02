@@ -154,6 +154,9 @@ const EditProduct = () => {
                 if (tipo === 'colores') {
                     return { tipo, label: label || "Elige una familia de colores" };
                 }
+                if (tipo === 'muranos') {
+                    return { tipo, label: label || "Elige el color de murano" };
+                }
                 return null;
             }).filter(Boolean);
 
@@ -215,6 +218,7 @@ const EditProduct = () => {
                     <option value="texto">Texto Personalizado</option>
                     <option value="selector">Selector Fijo (ej. Letras)</option>
                     <option value="colores">Selector de Colores de Hilo</option>
+                    <option value="muranos">Selector de Colores de Murano</option>
                   </select>
                 </div>
                 {p.tipo && p.tipo !== 'colores' && (
@@ -246,6 +250,10 @@ const EditProduct = () => {
 
               {p.tipo === 'colores' && (
                 <p className="customization-notice">Se mostrará el selector de colores de hilo estándar.</p>
+              )}
+
+              {p.tipo === 'muranos' && (
+                <p className="customization-notice">Se mostrará el selector de colores de murano estándar.</p>
               )}
             </div>
           ))}

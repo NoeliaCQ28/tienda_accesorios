@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './ProductDetailPage.css';
 import ProductColorSelector from '../components/ProductColorSelector';
+import MuranoColorSelector from '../components/MuranoColorSelector';
 import ProductOptionSelector from '../components/ProductOptionSelector';
 
 const ProductDetailPage = () => {
@@ -23,6 +24,7 @@ const ProductDetailPage = () => {
     
     // --- ESTADOS PARA CADA TIPO DE PERSONALIZACIÓN ---
     const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedMuranoColor, setSelectedMuranoColor] = useState(null);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [selectedOptions, setSelectedOptions] = useState({});
     // --- MODIFICADO: Estado para el texto ahora es un objeto ---
@@ -62,6 +64,7 @@ const ProductDetailPage = () => {
     const textCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'texto') || [];
     const selectorCustomizations = product?.personalizaciones?.filter(p => p.tipo === 'selector') || [];
     const colorCustomization = product?.personalizaciones?.find(p => p.tipo === 'colores');
+    const muranoCustomization = product?.personalizaciones?.find(p => p.tipo === 'muranos');
 
     const handleMaterialSelect = (personalizacionLabel, option) => {
         // Lógica de selección/deselección para un grupo de materiales
@@ -98,6 +101,11 @@ const ProductDetailPage = () => {
             return;
         }
 
+        if (muranoCustomization?.obligatorio && !selectedMuranoColor) {
+            toast.error(`Por favor, elige un color de murano`);
+            return;
+        }
+
         if (currentUser) {
             const finalCustomizations = [];
 
@@ -114,6 +122,18 @@ const ProductDetailPage = () => {
                     finalCustomizations.push({ type: label, value });
                 }
             });
+
+            if (selectedMuranoColor) {
+                finalCustomizations.push({ 
+                    type: 'Murano Color', 
+                    value: `${selectedMuranoColor.fullName} (${selectedMuranoColor.sizeInfo?.diameter || selectedMuranoColor.sizeInfo?.name || 'Tamaño ' + selectedMuranoColor.size})`,
+                    details: {
+                        color: selectedMuranoColor.color,
+                        size: selectedMuranoColor.size,
+                        name: selectedMuranoColor.name
+                    }
+                });
+            }
             
             // Guardar textos personalizados
             Object.entries(customizationsText).forEach(([label, text]) => {
@@ -145,7 +165,9 @@ const ProductDetailPage = () => {
     if (loading) return <div className="detail-loading">Cargando producto...</div>;
     if (!product) return <div className="detail-loading">Producto no encontrado.</div>;
     
-    const isAddToCartDisabled = (materialCustomizations.length > 0 && !selectedMaterial) || (colorCustomization && selectedColor === null);
+    const isAddToCartDisabled = (materialCustomizations.length > 0 && !selectedMaterial) || 
+                               (colorCustomization && selectedColor === null) || 
+                               (muranoCustomization?.obligatorio && !selectedMuranoColor);
 
     return (
         <div className="product-detail-page">
@@ -204,6 +226,17 @@ const ProductDetailPage = () => {
                         {/* 3. Selector de Color */}
                         {colorCustomization && (
                             <ProductColorSelector product={product} onColorChange={setSelectedColor} />
+                        )}
+
+                        {/* 4. Selector de Muranos */}
+                        {muranoCustomization && (
+                            <div className="customization-container">
+                                <label className="customization-label">
+                                    {muranoCustomization.label || "Elige el color de murano"}
+                                    {muranoCustomization.obligatorio && <span className="required">*</span>}
+                                </label>
+                                <MuranoColorSelector onColorChange={setSelectedMuranoColor} />
+                            </div>
                         )}
                     </div>
                     

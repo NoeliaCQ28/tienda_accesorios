@@ -111,6 +111,12 @@ const AddProduct = () => {
             const opcionesArray = opcionesFijas.split(',').map(opt => opt.trim()).filter(Boolean);
             return { tipo, label, opciones: opcionesArray };
           }
+          if (tipo === 'colores') {
+            return { tipo, label: label || 'Elige el color de hilo' };
+          }
+          if (tipo === 'muranos') {
+            return { tipo, label: label || 'Elige el color de murano' };
+          }
           return null;
         }).filter(Boolean);
 
@@ -169,6 +175,7 @@ const AddProduct = () => {
                     <option value="texto">Texto Personalizado</option>
                     <option value="selector">Selector Fijo (ej. Letras)</option>
                     <option value="colores">Selector de Colores de Hilo</option>
+                    <option value="muranos">Selector de Colores de Murano</option>
                   </select>
                 </div>
                 {p.tipo && p.tipo !== 'colores' && (
@@ -211,6 +218,29 @@ const AddProduct = () => {
 
               {p.tipo === 'colores' && (
                 <p className="customization-notice">Se mostrará el selector de colores de hilo estándar.</p>
+              )}
+
+              {p.tipo === 'muranos' && (
+                <div className="murano-selector-demo">
+                  <p className="demo-info">Se mostrará el selector de muranos con diferentes tamaños para el cliente.</p>
+                  <p className="demo-label"><strong>Incluye:</strong> Tamaños #3, #4, #6, #8 y selección de colores</p>
+                  <div className="demo-preview">
+                    <div className="demo-murano-sizes">
+                      <div className="demo-size small" title="Tamaño #3">#3</div>
+                      <div className="demo-size medium-small" title="Tamaño #4">#4</div>
+                      <div className="demo-size medium" title="Tamaño #6">#6</div>
+                      <div className="demo-size large" title="Tamaño #8">#8</div>
+                    </div>
+                    <div className="demo-murano-colors">
+                      <div className="demo-color" style={{backgroundColor: '#DC143C'}}></div>
+                      <div className="demo-color" style={{backgroundColor: '#000080'}}></div>
+                      <div className="demo-color" style={{backgroundColor: '#50C878'}}></div>
+                      <div className="demo-color" style={{backgroundColor: '#800080'}}></div>
+                      <div className="demo-color" style={{backgroundColor: '#FFD700'}}></div>
+                    </div>
+                    <p className="demo-text">Vista previa: Selector completo de muranos por tamaños y colores</p>
+                  </div>
+                </div>
               )}
             </div>
           ))}
