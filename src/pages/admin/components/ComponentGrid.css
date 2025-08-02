@@ -1,0 +1,493 @@
+/* src/pages/admin/components/ComponentGrid.css */
+
+/* Grid View */
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.grid-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.grid-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.grid-image {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.grid-image img,
+.color-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.color-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color, #ccc) 0%, transparent 100%);
+}
+
+.grid-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.grid-item:hover .grid-overlay {
+  opacity: 1;
+}
+
+.overlay-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.overlay-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.edit-btn:hover {
+  background: #e3f2fd;
+}
+
+.delete-btn:hover {
+  background: #ffebee;
+}
+
+.grid-info {
+  padding: 16px;
+}
+
+.grid-name {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+}
+
+.grid-details {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #666;
+}
+
+.grid-type {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.grid-subtype {
+  text-transform: capitalize;
+}
+
+.grid-color {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.grid-sku {
+  font-size: 11px;
+  color: #666;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.grid-stock {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.grid-stock.good {
+  background: #d4edda;
+  color: #155724;
+}
+
+.grid-stock.low {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.grid-stock.out {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.grid-price {
+  font-size: 12px;
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* Cards View */
+.component-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  padding: 20px;
+}
+
+.card-item {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.card-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
+}
+
+.card-image img,
+.card-image .color-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-title-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+}
+
+.card-type {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.card-subtype {
+  text-transform: capitalize;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.card-action-btn {
+  background: white;
+  border: 1px solid #ddd;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.card-action-btn.edit:hover {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.card-action-btn.delete:hover {
+  background: #ffebee;
+  border-color: #f44336;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-description {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #555;
+  min-width: 70px;
+}
+
+.detail-color {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-sku {
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #666;
+}
+
+.detail-stock.good {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.detail-stock.low {
+  color: #ffc107;
+  font-weight: 500;
+}
+
+.detail-stock.out {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.detail-prices {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cost-price {
+  font-size: 12px;
+  color: #666;
+}
+
+.sell-price {
+  font-size: 12px;
+  color: #28a745;
+  font-weight: 600;
+}
+
+.detail-supplier,
+.detail-usage,
+.detail-date {
+  color: #666;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  background: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .component-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .component-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .card-header {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .card-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .card-name {
+    font-size: 16px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .component-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .card-actions {
+    justify-content: center;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .grid-item,
+  .card-item {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .grid-name,
+  .card-name {
+    color: #e9ecef;
+  }
+
+  .grid-details,
+  .card-meta,
+  .detail-label,
+  .card-description {
+    color: #a0aec0;
+  }
+
+  .grid-color,
+  .detail-color {
+    color: #cbd5e0;
+  }
+
+  .grid-sku,
+  .detail-sku {
+    background: #374151;
+    color: #a0aec0;
+  }
+
+  .card-header {
+    background: #374151;
+    border-bottom-color: #4a5568;
+  }
+
+  .card-action-btn {
+    background: #374151;
+    border-color: #4a5568;
+    color: #e9ecef;
+  }
+
+  .overlay-btn {
+    background: rgba(45, 55, 72, 0.9);
+    color: #e9ecef;
+  }
+
+  .overlay-btn:hover {
+    background: #2d3748;
+  }
+
+  .tag {
+    background: #4a5568;
+    color: #e9ecef;
+  }
+
+  .detail-supplier,
+  .detail-usage,
+  .detail-date {
+    color: #a0aec0;
+  }
+
+  .cost-price {
+    color: #a0aec0;
+  }
+}

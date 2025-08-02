@@ -6,12 +6,15 @@ import { db, storage } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import toast from 'react-hot-toast';
+import ComponentSelector from '../../components/ComponentSelector';
+import { useComponentUsage } from '../../hooks/useComponentUsage';
 import '../Admin.css';
 import './Customizations.css'; // Reutilizamos los mismos estilos
 
 const EditProduct = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { incrementComponentUsage, decrementComponentUsage } = useComponentUsage();
 
   // Estados para los campos básicos
   const [nombre, setNombre] = useState('');
@@ -25,6 +28,7 @@ const EditProduct = () => {
 
   // --- NUEVO: Estado para gestionar las personalizaciones ---
   const [personalizaciones, setPersonalizaciones] = useState([]);
+  const [originalComponentIds, setOriginalComponentIds] = useState([]);
 
   // --- MODIFICADO: useEffect para cargar TODOS los datos del producto, incluyendo personalizaciones ---
   useEffect(() => {
@@ -56,8 +60,19 @@ const EditProduct = () => {
               : [],
             // Para 'selector', unimos el array de nuevo en un string para el textarea
             opcionesFijas: (p.tipo === 'selector' && Array.isArray(p.opciones)) ? p.opciones.join(', ') : '',
+            // Asegurar que los campos de componentes existan
+            selectedComponents: p.selectedComponents || [],
+            componentPrices: p.componentPrices || {},
+            allowMultiple: p.allowMultiple || false,
+            filterByType: p.filterByType || ''
           }));
           setPersonalizaciones(loadedPersonalizaciones);
+
+          // Extraer IDs de componentes originales para el tracking de uso
+          const originalComponents = loadedPersonalizaciones
+            .filter(p => p.tipo === 'componentes')
+            .flatMap(p => p.selectedComponents || []);
+          setOriginalComponentIds(originalComponents);
         }
 
       } else {
@@ -72,7 +87,21 @@ const EditProduct = () => {
   
   // --- NUEVO: Todas las funciones para manejar el estado de las personalizaciones (idénticas a AddProduct.jsx) ---
   const addPersonalizacion = () => {
-    setPersonalizaciones([ ...personalizaciones, { id: Date.now(), tipo: '', label: '', opciones: [{ id: Date.now(), nombre: '', precio: 0 }], opcionesFijas: '', maxLength: 20 } ]);
+    setPersonalizaciones([ 
+      ...personalizaciones, 
+      { 
+        id: Date.now(), 
+        tipo: '', 
+        label: '', 
+        opciones: [{ id: Date.now(), nombre: '', precio: 0 }], 
+        opcionesFijas: '', 
+        maxLength: 20,
+        selectedComponents: [],
+        componentPrices: {},
+        allowMultiple: false,
+        filterByType: ''
+      } 
+    ]);
   };
 
   const removePersonalizacion = (id) => {
@@ -87,6 +116,10 @@ const EditProduct = () => {
               updatedP.opciones = [{ id: Date.now(), nombre: '', precio: 0 }];
               updatedP.opcionesFijas = '';
               updatedP.maxLength = 20;
+              updatedP.selectedComponents = [];
+              updatedP.componentPrices = {};
+              updatedP.allowMultiple = false;
+              updatedP.filterByType = '';
               if (value === 'colores') updatedP.label = 'Elige una familia de colores';
             }
             return updatedP;
@@ -117,6 +150,34 @@ const EditProduct = () => {
   const removeOption = (pId, optionId) => {
     setPersonalizaciones(personalizaciones.map(p => p.id === pId ? { ...p, opciones: p.opciones.filter(opt => opt.id !== optionId) } : p));
   };
+
+  // Nuevas funciones para manejar el ComponentSelector
+  const handleComponentToggle = (pId, selectedComponents) => {
+    setPersonalizaciones(personalizaciones.map(p => 
+      p.id === pId ? { ...p, selectedComponents } : p
+    ));
+  };
+
+  const handleComponentPriceChange = (pId, componentId, price) => {
+    setPersonalizaciones(personalizaciones.map(p => {
+      if (p.id === pId) {
+        return {
+          ...p,
+          componentPrices: {
+            ...p.componentPrices,
+            [componentId]: price
+          }
+        };
+      }
+      return p;
+    }));
+  };
+
+  const handleComponentConfigChange = (pId, field, value) => {
+    setPersonalizaciones(personalizaciones.map(p => 
+      p.id === pId ? { ...p, [field]: value } : p
+    ));
+  };
   
   const handleImageChange = (e) => {
     if (e.target.files[0]) setImageFile(e.target.files[0]);
@@ -140,9 +201,19 @@ const EditProduct = () => {
             const tagsArray = tags.split(',').map(tag => tag.trim().toLowerCase());
 
             // Preparamos las personalizaciones para guardarlas, limpiando datos e IDs temporales
-            const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, opcionesFijas, maxLength }) => {
+            const finalPersonalizaciones = personalizaciones.map(({ id, tipo, label, opciones, opcionesFijas, maxLength, selectedComponents, componentPrices, allowMultiple, filterByType }) => {
                 if (tipo === 'material') {
                     return { tipo, label, opciones: opciones.map(({ id, ...optRest }) => optRest).filter(opt => opt.nombre) };
+                }
+                if (tipo === 'componentes') {
+                    return { 
+                      tipo, 
+                      label, 
+                      selectedComponents: selectedComponents || [],
+                      componentPrices: componentPrices || {},
+                      allowMultiple: allowMultiple || false,
+                      filterByType: filterByType || ''
+                    };
                 }
                 if (tipo === 'texto') {
                     return { tipo, label, maxLength: Number(maxLength) };
@@ -170,6 +241,33 @@ const EditProduct = () => {
                 imagenUrl: imageUrl,
                 personalizaciones: finalPersonalizaciones,
             };
+
+            // Actualizar uso de componentes
+            const componentesPersonalizacion = personalizaciones.find(p => p.tipo === 'componentes');
+            if (componentesPersonalizacion?.selectedComponents) {
+                // Obtener componentes seleccionados previamente
+                const originalProduct = await getDoc(doc(db, 'productos', productId));
+                const originalData = originalProduct.data();
+                const originalComponentes = originalData?.personalizaciones
+                    ?.find(p => p.tipo === 'componentes')
+                    ?.selectedComponents || [];
+
+                // Decrementar uso de componentes que ya no están seleccionados
+                for (const originalCompId of originalComponentes) {
+                    const stillSelected = componentesPersonalizacion.selectedComponents.includes(originalCompId);
+                    if (!stillSelected) {
+                        await decrementComponentUsage(originalCompId);
+                    }
+                }
+
+                // Incrementar uso de componentes nuevos
+                for (const newCompId of componentesPersonalizacion.selectedComponents) {
+                    const wasSelected = originalComponentes.includes(newCompId);
+                    if (!wasSelected) {
+                        await incrementComponentUsage(newCompId);
+                    }
+                }
+            }
 
             await updateDoc(doc(db, 'productos', productId), updatedData);
             navigate('/admin');
@@ -215,6 +313,7 @@ const EditProduct = () => {
                   <select value={p.tipo} onChange={(e) => handlePersonalizacionChange(p.id, 'tipo', e.target.value)}>
                     <option value="" disabled>-- Elige un tipo --</option>
                     <option value="material">Material (con precio por opción)</option>
+                    <option value="componentes">Selector de Componentes</option>
                     <option value="texto">Texto Personalizado</option>
                     <option value="selector">Selector Fijo (ej. Letras)</option>
                     <option value="colores">Selector de Colores de Hilo</option>
@@ -238,6 +337,18 @@ const EditProduct = () => {
                   ))}
                   <button type="button" className="btn-add-option" onClick={() => addOption(p.id)}>+ Añadir Opción</button>
                 </>
+              )}
+
+              {p.tipo === 'componentes' && (
+                <ComponentSelector
+                  selectedComponents={p.selectedComponents || []}
+                  componentPrices={p.componentPrices || {}}
+                  allowMultiple={p.allowMultiple || false}
+                  filterByType={p.filterByType || ''}
+                  onComponentToggle={(selectedComponents) => handleComponentToggle(p.id, selectedComponents)}
+                  onPriceChange={(componentId, price) => handleComponentPriceChange(p.id, componentId, price)}
+                  onConfigChange={(field, value) => handleComponentConfigChange(p.id, field, value)}
+                />
               )}
 
               {p.tipo === 'texto' && (
