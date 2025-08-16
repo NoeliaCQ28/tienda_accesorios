@@ -38,7 +38,7 @@ const navLinks = [
     path: '/category/pulseras',
     subItems: [
       { name: 'MURANO', path: '/category/murano' },
-      { 
+      {
         name: 'HILO',
         path: '/category/hilo',
         subItems: [
@@ -49,40 +49,40 @@ const navLinks = [
       }
     ]
   },
-  { 
-    name: 'COLLARES', 
-    path: '/category/collares', 
+  {
+    name: 'COLLARES',
+    path: '/category/collares',
     subItems: [
       { name: 'GARGANTILLAS', path: '/category/gargantillas' }
-    ] 
+    ]
   },
-  { 
-    name: 'RESINA', 
-    path: '/category/resina', 
+  {
+    name: 'RESINA',
+    path: '/category/resina',
     subItems: [
-      { name: 'LLAVEROS', path: '/category/llaveros' }, 
-      { name: 'MARCAPÁGINAS', path: '/category/marcapaginas' }, 
+      { name: 'LLAVEROS', path: '/category/llaveros' },
+      { name: 'MARCAPÁGINAS', path: '/category/marcapaginas' },
       { name: 'ENMARCAR RECUERDOS', path: '/category/enmarcar-recuerdos' }
-    ] 
+    ]
   },
-  { 
-    name: 'ACCESORIOS CELULAR', 
-    path: '/category/accesorios-celular', 
+  {
+    name: 'ACCESORIOS CELULAR',
+    path: '/category/accesorios-celular',
     subItems: [
-      { name: 'PHONE STRAP', path: '/category/phone-strap' }, 
+      { name: 'PHONE STRAP', path: '/category/phone-strap' },
       { name: 'TAPA POLVOS', path: '/category/tapa-polvos' }
-    ] 
+    ]
   },
-  { 
-    name: 'RECUERDOS', 
-    path: '/category/recuerdos', 
+  {
+    name: 'RECUERDOS',
+    path: '/category/recuerdos',
     subItems: [
-      { name: 'BAUTIZO', path: '/category/bautizo' }, 
-      { name: 'PRIMERA COMUNIÓN', path: '/category/primera-comunion' }, 
-      { name: 'CONFIRMACIÓN', path: '/category/confirmacion' }, 
-      { name: 'XV', path: '/category/xv' }, 
+      { name: 'BAUTIZO', path: '/category/bautizo' },
+      { name: 'PRIMERA COMUNIÓN', path: '/category/primera-comunion' },
+      { name: 'CONFIRMACIÓN', path: '/category/confirmacion' },
+      { name: 'XV', path: '/category/xv' },
       { name: 'GRADUACIÓN', path: '/category/graduacion' }
-    ] 
+    ]
   },
 ];
 
@@ -92,23 +92,18 @@ const NavItem = ({ item, onLinkClick, isMobile = false }) => {
   const hasSubItems = item.subItems && item.subItems.length > 0;
 
   const handleParentClick = (e) => {
-    console.log(`Clicked on: ${item.name}, isMobile: ${isMobile}, hasSubItems: ${hasSubItems}`);
-    
     if (hasSubItems && isMobile) {
       // En móvil, prevenir navegación y toggle submenu
       e.preventDefault();
       e.stopPropagation();
       setIsSubMenuOpen(!isSubMenuOpen);
-      console.log(`Toggling submenu for ${item.name}: ${!isSubMenuOpen}`);
     } else {
       // En desktop o sin subitems, navegar normalmente
-      console.log(`Navigating to: ${item.path}`);
       onLinkClick();
     }
   };
 
   const handleSubItemClick = () => {
-    console.log('Sub-item clicked, closing menu');
     onLinkClick();
   };
 
@@ -121,8 +116,8 @@ const NavItem = ({ item, onLinkClick, isMobile = false }) => {
 
   return (
     <li className={`nav-item ${hasSubItems ? 'dropdown' : ''} ${isSubMenuOpen ? 'open' : ''}`}>
-      <Link 
-        to={item.path || '#'} 
+      <Link
+        to={item.path || '#'}
         onClick={handleParentClick}
         className="nav-link"
       >
@@ -131,9 +126,9 @@ const NavItem = ({ item, onLinkClick, isMobile = false }) => {
       {hasSubItems && (
         <ul className="dropdown-menu">
           {item.subItems.map(subItem => (
-            <NavItem 
-              key={subItem.name} 
-              item={subItem} 
+            <NavItem
+              key={subItem.name}
+              item={subItem}
               onLinkClick={handleSubItemClick}
               isMobile={isMobile}
             />
@@ -169,29 +164,28 @@ function Header() {
 
   // Cerrar menú cuando cambia la ruta
   useEffect(() => {
-    console.log('Route changed, closing menu');
     setIsMenuOpen(false);
   }, [location.pathname]);
 
   // Manejar scroll del body cuando el menú está abierto
   useEffect(() => {
     if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.classList.add('menu-open');
+      document.documentElement.classList.add('no-scroll');
+      document.body.classList.add('no-scroll');
     } else {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('menu-open');
+      document.documentElement.classList.remove('no-scroll');
+      document.body.classList.remove('no-scroll');
     }
-    
+
     // Cleanup
     return () => {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('menu-open');
+      document.documentElement.classList.remove('no-scroll');
+      document.body.classList.remove('no-scroll');
     };
   }, [isMenuOpen]);
 
+
   const handleLogout = async () => {
-    console.log('Logout clicked');
     setIsMenuOpen(false);
     try {
       await logout();
@@ -207,24 +201,19 @@ function Header() {
   const handleMenuToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const newMenuState = !isMenuOpen;
-    console.log('Menu toggle clicked, new state:', newMenuState);
-    setIsMenuOpen(newMenuState);
+    setIsMenuOpen(prevState => !prevState);
   };
 
   const handleLinkClick = () => {
-    console.log('Link clicked, closing menu');
     setIsMenuOpen(false);
   };
 
   const handleSearchOpen = () => {
-    console.log('Search opened');
     setIsSearchOpen(true);
     setIsMenuOpen(false);
   };
 
   const handleBrandClick = () => {
-    console.log('Brand clicked');
     setIsMenuOpen(false);
   };
 
@@ -237,22 +226,22 @@ function Header() {
               <h1>Accesorios Liath</h1>
             </Link>
           </div>
-          
+
           <nav className={`main-nav ${isMenuOpen ? 'open' : ''}`}>
             <ul className="nav-list">
               {navLinks.map(link => (
-                <NavItem 
-                  key={link.name} 
-                  item={link} 
+                <NavItem
+                  key={link.name}
+                  item={link}
                   onLinkClick={handleLinkClick}
                   isMobile={isMobile}
                 />
               ))}
             </ul>
-            
+
             <div className="user-actions-mobile">
-              <button 
-                onClick={handleSearchOpen} 
+              <button
+                onClick={handleSearchOpen}
                 className="search-icon-btn-mobile"
                 type="button"
               >
@@ -307,9 +296,9 @@ function Header() {
                 <Link to="/login" className="btn-login">Ingresar</Link>
               )}
             </div>
-            
-            <button 
-              className="menu-toggle" 
+
+            <button
+              className="menu-toggle"
               onClick={handleMenuToggle}
               aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
               aria-expanded={isMenuOpen}
@@ -319,17 +308,16 @@ function Header() {
             </button>
           </div>
         </div>
-        
-        {/* Overlay para cerrar el menú al hacer clic fuera */}
+
         {isMenuOpen && (
-          <div 
-            className="menu-overlay" 
+          <div
+            className="menu-overlay"
             onClick={() => setIsMenuOpen(false)}
             aria-hidden="true"
           />
         )}
       </header>
-      
+
       {isSearchOpen && <SearchOverlay onClose={() => setIsSearchOpen(false)} />}
     </>
   );
@@ -337,7 +325,7 @@ function Header() {
 
 function App() {
   const { currentUser } = useAuth();
-  
+
   return (
     <div className="page-container">
       <Toaster position="bottom-right" reverseOrder={false} />
